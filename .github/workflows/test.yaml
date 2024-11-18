@@ -10,5 +10,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Setup Surrealdb
-        run: docker run --rm --pull always -p 5176:8000 surrealdb/surrealdb:latest start --user root --pass root
+        run: |
+          docker run --rm --pull always -d \
+            -p 5176:8000 \
+            surrealdb/surrealdb:latest start \
+            --user root --pass root
       - run: cargo test --verbose --all-features
