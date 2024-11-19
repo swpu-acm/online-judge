@@ -26,9 +26,8 @@ use crate::{
 #[derive(Serialize, Deserialize)]
 pub struct RegisterData {
     pub username: String,
-    pub password: String,
     pub email: String,
-    pub role: u8,
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -69,7 +69,6 @@ async fn test_register() -> Result<()> {
             username: "fu050409".to_string(),
             password: "password".to_string(),
             email: "email@example.com".to_string(),
-            role: 1,
         })
         .dispatch()
         .await;

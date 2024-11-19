@@ -4,10 +4,10 @@ use surrealdb::sql::Thing;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub enum Role {
-    SuperAdmin,
-    Admin,
     #[default]
     User,
+    SuperAdmin,
+    Admin,
     Reserve,
 }
 

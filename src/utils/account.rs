@@ -24,11 +24,7 @@ pub async fn create(db: &Surreal<Client>, register: RegisterData) -> Result<Opti
             username: register.username,
             password: register.password,
             email: register.email,
-            role: match register.role {
-                0 => Role::User,
-                1 => Role::Reserve,
-                _ => return Err(anyhow::anyhow!("Invalid role type: {}", register.role)),
-            },
+            role: Role::User,
             created_at: chrono::Local::now().naive_local(),
             ..Default::default()
         })
