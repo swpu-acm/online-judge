@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::routes::account;
+use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
@@ -31,6 +31,7 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
     .expect("Failed to authenticate");
 
     rocket::build()
+        .attach(CORS)
         .mount("/", routes![index, files])
         .mount("/account", account::routes())
         .manage(db)

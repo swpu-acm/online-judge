@@ -97,6 +97,7 @@ async fn test_register() -> Result<()> {
                 avatar: None,
                 signature: None,
                 links: None,
+                nickname: None,
                 name: Some("苏向夜".into()),
                 sex: None,
                 birthday: None,

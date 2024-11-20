@@ -37,7 +37,7 @@ pub struct RegisterResponse {
     pub token: String,
 }
 
-#[post("/register", data = "<register>")]
+#[post("/create", data = "<register>")]
 pub async fn register(
     db: &State<Surreal<Client>>,
     register: Json<RegisterData>,

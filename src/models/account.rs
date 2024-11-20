@@ -4,10 +4,10 @@ use surrealdb::sql::Thing;
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub enum Role {
-    #[default]
-    User,
     SuperAdmin,
     Admin,
+    #[default]
+    User,
     Reserve,
 }
 
@@ -21,10 +21,11 @@ pub struct Account {
     pub signature: Option<String>,
     pub links: Option<Vec<String>>,
 
-    pub name: Option<String>,
+    pub nickname: Option<String>,
     pub sex: Option<bool>,
     pub birthday: Option<chrono::NaiveDateTime>,
 
+    pub name: Option<String>,
     pub student_id: Option<String>,
     pub school: Option<String>,
     pub college: Option<String>,
@@ -48,12 +49,14 @@ pub struct Profile {
     pub links: Option<Vec<String>>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
+    pub nickname: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sex: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub birthday: Option<String>,
 
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub student_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
