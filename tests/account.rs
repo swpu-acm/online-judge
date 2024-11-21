@@ -94,6 +94,8 @@ async fn test_register() -> Result<()> {
             id: &data.id,
             token: &data.token,
             profile: Profile {
+                email: None,
+                username: None,
                 avatar: None,
                 signature: None,
                 links: None,
@@ -105,6 +107,9 @@ async fn test_register() -> Result<()> {
                 school: None,
                 college: None,
                 major: None,
+                rating: None,
+                active: None,
+                role: None,
             },
         })
         .dispatch()

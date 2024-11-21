@@ -59,3 +59,11 @@ pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<()> {
     db.delete::<Option<Account>>(("account", id)).await?;
     Ok(())
 }
+
+pub async fn get_by_identity(db: &Surreal<Client>, identity: &str) -> Result<Option<Account>> {
+    Ok(db
+        .query("SELECT * FROM account WHERE username = $identity OR email = $identity")
+        .bind(("identity", identity.to_string()))
+        .await?
+        .take(0)?)
+}

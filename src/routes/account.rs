@@ -202,7 +202,7 @@ pub async fn upload_content(
         success: true,
         message: "Content updated successfully".into(),
         data: Some(UploadResponse {
-            uri: format!("/content/{}/{}", data.id, file_name),
+            uri: format!("/account/content/{}/{}", data.id, file_name),
         }),
     }))
 }
@@ -235,6 +235,38 @@ pub async fn delete(
     .into())
 }
 
+#[derive(Deserialize)]
+pub struct Login<'r> {
+    pub identity: &'r str,
+    pub password: &'r str,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct LoginResponse {
+    pub id: String,
+    pub token: String,
+}
+
+#[post("/login", data = "<login>")]
+pub async fn login(
+    db: &State<Surreal<Client>>,
+    login: Json<Login<'_>>,
+) -> Result<Json<Response<LoginResponse>>, Error> {
+    let session = session::authenticate(db, login.identity, login.password)
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .ok_or(Error::Unauthorized(Json("Invalid credentials".into())))?;
+    Ok(Response {
+        success: true,
+        message: "Login successful".into(),
+        data: Some(LoginResponse {
+            id: session.account_id.id.to_string(),
+            token: session.token.clone(),
+        }),
+    }
+    .into())
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
     routes![
@@ -243,6 +275,7 @@ pub fn routes() -> Vec<rocket::Route> {
         get_profile,
         content,
         upload_content,
-        delete
+        delete,
+        login
     ]
 }
