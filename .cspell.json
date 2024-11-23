@@ -1,7 +1,10 @@
 {
     "words": [
         "chrono",
+        "covector",
         "farmfe",
+        "ICPC",
+        "serde",
         "signin",
         "surrealdb"
     ]
