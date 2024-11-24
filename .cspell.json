@@ -5,6 +5,9 @@
         "farmfe",
         "ICPC",
         "serde",
+        "dtolnay",
+        "farmfe",
+        "jbolda",
         "signin",
         "surrealdb"
     ]

@@ -9,5 +9,5 @@ chrono = { version = "0.4.38", features = ["serde"] }
 eval-stack = "0.1.0"
 rocket = { version = "0.5.1", features = ["json"] }
 serde = { version = "1.0.214", features = ["derive"] }
-surrealdb = "2.0.4"
+surrealdb = "2.1.0"
 uuid = { version = "1.11.0", features = ["v4"] }

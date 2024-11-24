@@ -1,7 +1,11 @@
 name: Test
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -15,4 +19,6 @@ jobs:
             -p 5176:8000 \
             surrealdb/surrealdb:latest start \
             --user root --pass root
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - run: cargo test --verbose --all-features
