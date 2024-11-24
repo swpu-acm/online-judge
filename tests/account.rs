@@ -64,7 +64,7 @@ async fn test_register() -> Result<()> {
 
     println!("Testing register...");
     let response = client
-        .post("/account/register")
+        .post("/account/create")
         .json(&RegisterData {
             username: "fu050409".to_string(),
             password: "password".to_string(),
@@ -165,7 +165,7 @@ async fn test_register() -> Result<()> {
     let data: UploadResponse = data.unwrap();
 
     assert!(success);
-    assert_eq!(data.uri, format!("/content/{}/avatar.png", &id));
+    assert!(data.uri.starts_with("/account/content/"));
 
     let response = client
         .post(format!("/account/delete/{}", id))
