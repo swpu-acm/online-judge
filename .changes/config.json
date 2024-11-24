@@ -1,0 +1,35 @@
+{
+  "gitSiteUrl": "https://github.com/swpu-acm/online-judge/",
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        }
+      },
+      "publish": [
+        "npm publish --provenance --access public"
+      ]
+    },
+    "rust": {
+      "version": true,
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://crates.io/api/v1/crates/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        }
+      },
+      "publish": [
+        "cargo publish --no-verify --allow-dirty"
+      ]
+    }
+  },
+  "packages": {
+    "online-judge": {
+      "path": ".",
+      "manager": "rust"
+    }
+  }
+}
