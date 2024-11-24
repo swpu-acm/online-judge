@@ -1,5 +1,5 @@
 [package]
-name = "online-judge"
+name = "algohub-server"
 version = "0.1.0"
 edition = "2021"
 description = "Extremely fast async online judge backend based on Rust"

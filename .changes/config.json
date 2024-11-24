@@ -13,7 +13,7 @@
     }
   },
   "packages": {
-    "online-judge": {
+    "algohub-server": {
       "path": ".",
       "manager": "rust"
     }

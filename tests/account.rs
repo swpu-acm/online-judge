@@ -1,7 +1,7 @@
 use std::{fs::File, io::Read, path::Path};
 
 use anyhow::Result;
-use online_judge::{
+use algohub_server::{
     models::{
         account::Profile,
         response::{Empty, Response},
@@ -58,7 +58,7 @@ impl AsRef<[u8]> for Upload {
 
 #[rocket::async_test]
 async fn test_register() -> Result<()> {
-    let rocket = online_judge::rocket().await;
+    let rocket = algohub_server::rocket().await;
 
     let client = Client::tracked(rocket).await?;
 
