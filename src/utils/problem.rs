@@ -1,10 +1,13 @@
 use anyhow::Result;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::models::problem::Problem;
+use crate::{models::problem::Problem, routes::problem::ProblemData};
 
-pub async fn create(db: &Surreal<Client>, problem: Problem) -> Result<Option<Problem>> {
-    Ok(db.create("problem").content(problem).await?)
+pub async fn create(db: &Surreal<Client>, problem: ProblemData<'_>) -> Result<Option<Problem>> {
+    Ok(db
+        .create("problem")
+        .content(Into::<Problem>::into(problem))
+        .await?)
 }
 
 pub async fn update(db: &Surreal<Client>, problem: Problem) -> Result<Option<Problem>> {
