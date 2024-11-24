@@ -12,3 +12,6 @@
 
 # Datas
 /content
+
+# Node.js
+/node_modules
