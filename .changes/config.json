@@ -6,24 +6,20 @@
       "getPublishedVersion": {
         "use": "fetch:check",
         "options": {
-          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+          "url": "https://api.github.com/repos/swpu-acm/online-judge/git/refs/tags/online-judge-v${ pkg.pkgFile.version }"
         }
       },
-      "publish": [
-        "npm publish --provenance --access public"
-      ]
+      "publish": ["npm publish --provenance --access public"]
     },
     "rust": {
       "version": true,
       "getPublishedVersion": {
         "use": "fetch:check",
         "options": {
-          "url": "https://crates.io/api/v1/crates/${ pkg.pkg }/${ pkg.pkgFile.version }"
+          "url": "https://api.github.com/repos/swpu-acm/online-judge/git/refs/tags/online-judge-v${ pkg.pkgFile.version }"
         }
       },
-      "publish": [
-        "cargo publish --no-verify --allow-dirty"
-      ]
+      "publish": []
     }
   },
   "packages": {
