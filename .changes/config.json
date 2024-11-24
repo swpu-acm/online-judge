@@ -1,0 +1,31 @@
+{
+  "gitSiteUrl": "https://github.com/swpu-acm/online-judge/",
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://api.github.com/repos/swpu-acm/online-judge/git/refs/tags/online-judge-v${ pkg.pkgFile.version }"
+        }
+      },
+      "publish": ["npm publish --provenance --access public"]
+    },
+    "rust": {
+      "version": true,
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://api.github.com/repos/swpu-acm/online-judge/git/refs/tags/online-judge-v${ pkg.pkgFile.version }"
+        }
+      },
+      "publish": []
+    }
+  },
+  "packages": {
+    "online-judge": {
+      "path": ".",
+      "manager": "rust"
+    }
+  }
+}
