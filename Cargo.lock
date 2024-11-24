@@ -70,6 +70,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "algohub-server"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "eval-stack",
+ "rocket",
+ "serde",
+ "surrealdb",
+ "uuid",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2287,19 +2300,6 @@ name = "once_cell"
 version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
-
-[[package]]
-name = "online-judge"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "eval-stack",
- "rocket",
- "serde",
- "surrealdb",
- "uuid",
-]
 
 [[package]]
 name = "overload"
