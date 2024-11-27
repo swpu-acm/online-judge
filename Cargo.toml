@@ -1,7 +1,13 @@
 [package]
-name = "online-judge"
-version = "0.1.0"
+name = "algohub-server"
+version = "0.1.1"
 edition = "2021"
+description = "Extremely fast async online judge backend based on Rust"
+readme = "README.md"
+homepage = "https://github.com/swpu-acm/online-judge"
+repository = "https://github.com/swpu-acm/online-judge"
+authors = ["苏向夜 <fu050409@163.com>"]
+license = "AGPL-3.0-only"
 
 [dependencies]
 anyhow = "1.0.92"
@@ -9,5 +15,5 @@ chrono = { version = "0.4.38", features = ["serde"] }
 eval-stack = "0.1.0"
 rocket = { version = "0.5.1", features = ["json"] }
 serde = { version = "1.0.214", features = ["derive"] }
-surrealdb = "2.0.4"
+surrealdb = "2.1.0"
 uuid = { version = "1.11.0", features = ["v4"] }

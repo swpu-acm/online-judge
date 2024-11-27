@@ -1,7 +1,7 @@
 use std::{fs::File, io::Read, path::Path};
 
 use anyhow::Result;
-use online_judge::{
+use algohub_server::{
     models::{
         account::Profile,
         response::{Empty, Response},
@@ -58,13 +58,13 @@ impl AsRef<[u8]> for Upload {
 
 #[rocket::async_test]
 async fn test_register() -> Result<()> {
-    let rocket = online_judge::rocket().await;
+    let rocket = algohub_server::rocket().await;
 
     let client = Client::tracked(rocket).await?;
 
     println!("Testing register...");
     let response = client
-        .post("/account/register")
+        .post("/account/create")
         .json(&RegisterData {
             username: "fu050409".to_string(),
             password: "password".to_string(),
@@ -165,7 +165,7 @@ async fn test_register() -> Result<()> {
     let data: UploadResponse = data.unwrap();
 
     assert!(success);
-    assert_eq!(data.uri, format!("/content/{}/avatar.png", &id));
+    assert!(data.uri.starts_with("/account/content/"));
 
     let response = client
         .post(format!("/account/delete/{}", id))

@@ -10,5 +10,9 @@
 *.sln
 *.sw?
 
-# Datas
+# Data Files
 /content
+/database
+
+# Node.js
+/node_modules

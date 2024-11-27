@@ -16,11 +16,13 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        account::{Profile, Record},
+        account::Profile,
         error::{Error, ErrorResponse},
         response::{Empty, Response},
+        Record,
     },
     utils::{account, session},
+    Result,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -41,7 +43,7 @@ pub struct RegisterResponse {
 pub async fn register(
     db: &State<Surreal<Client>>,
     register: Json<RegisterData>,
-) -> Result<Json<Response<RegisterResponse>>, Error> {
+) -> Result<RegisterResponse> {
     match account::create(db, register.into_inner()).await {
         Ok(Some(account)) => {
             let token = match session::create(db, account.id.clone().unwrap()).await {
@@ -81,10 +83,7 @@ pub struct ProfileData<'r> {
 }
 
 #[post("/profile", data = "<profile>")]
-pub async fn profile(
-    db: &State<Surreal<Client>>,
-    profile: Json<ProfileData<'_>>,
-) -> Result<Json<Response<Empty>>, Error> {
+pub async fn profile(db: &State<Surreal<Client>>, profile: Json<ProfileData<'_>>) -> Result<Empty> {
     account::get_by_id::<Record>(db, profile.id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
@@ -116,7 +115,7 @@ pub async fn get_profile(
     db: &State<Surreal<Client>>,
     id: &str,
     auth: Json<Authenticate<'_>>,
-) -> Result<Json<Response<Profile>>, Error> {
+) -> Result<Profile> {
     if !session::verify(db, id, auth.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant access permission".into(),
@@ -153,13 +152,14 @@ pub struct Upload<'r> {
 #[derive(Serialize, Deserialize)]
 pub struct UploadResponse {
     pub uri: String,
+    pub path: String,
 }
 
 #[put("/content/upload", data = "<data>")]
 pub async fn upload_content(
     db: &State<Surreal<Client>>,
     data: Form<Upload<'_>>,
-) -> Result<Json<Response<UploadResponse>>, Error> {
+) -> Result<UploadResponse> {
     if !session::verify(db, data.id, data.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant access permission".into(),
@@ -182,7 +182,7 @@ pub async fn upload_content(
             .await
             .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
     }
-    let file_name = format!("avatar.{}", file_extension);
+    let file_name = format!("{}.{}", uuid::Uuid::new_v4(), file_extension);
     let file_path = user_path.join(&file_name);
 
     let mut file = data
@@ -203,6 +203,7 @@ pub async fn upload_content(
         message: "Content updated successfully".into(),
         data: Some(UploadResponse {
             uri: format!("/account/content/{}/{}", data.id, file_name),
+            path: format!("content/{}/{}", data.id, file_name),
         }),
     }))
 }
@@ -212,7 +213,7 @@ pub async fn delete(
     db: &State<Surreal<Client>>,
     id: &str,
     auth: Json<Authenticate<'_>>,
-) -> Result<Json<Response<Empty>>, Error> {
+) -> Result<Empty> {
     if !session::verify(db, id, auth.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant access permission".into(),
@@ -248,10 +249,7 @@ pub struct LoginResponse {
 }
 
 #[post("/login", data = "<login>")]
-pub async fn login(
-    db: &State<Surreal<Client>>,
-    login: Json<Login<'_>>,
-) -> Result<Json<Response<LoginResponse>>, Error> {
+pub async fn login(db: &State<Surreal<Client>>, login: Json<Login<'_>>) -> Result<LoginResponse> {
     let session = session::authenticate(db, login.identity, login.password)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?

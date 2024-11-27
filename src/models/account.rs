@@ -114,8 +114,3 @@ pub struct Session {
     pub account_id: Thing,
     pub token: String,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Record {
-    id: Option<Thing>,
-}

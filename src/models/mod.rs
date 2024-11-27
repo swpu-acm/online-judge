@@ -1,12 +1,8 @@
-use serde::Serialize;
-
 pub mod account;
 pub mod error;
 pub mod organization;
 pub mod problem;
 pub mod response;
+pub mod shared;
 
-#[derive(Serialize)]
-pub struct UpdateAt {
-    pub updated_at: chrono::NaiveDateTime,
-}
+pub use shared::*;

@@ -12,9 +12,14 @@ pub mod utils {
 pub mod routes {
     pub mod account;
     pub mod index;
+    pub mod problem;
     pub mod organization;
 }
 
 pub mod cors;
+
+use models::response::Response;
+use rocket::serde::json::Json;
+pub type Result<T> = std::result::Result<Json<Response<T>>, models::error::Error>;
 
 pub use crate::routes::index::rocket;

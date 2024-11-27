@@ -1,18 +1,24 @@
 name: Test
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
       - name: Setup Surrealdb
         run: |
           docker run --rm --pull always -d \
             -p 5176:8000 \
             surrealdb/surrealdb:latest start \
             --user root --pass root
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
       - run: cargo test --verbose --all-features
