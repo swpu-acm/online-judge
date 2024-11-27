@@ -22,28 +22,24 @@ pub struct Problem {
 
     pub title: String,
     pub description: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub input: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub output: Option<String>,
     pub samples: Vec<Sample>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub hint: Option<String>,
 
-    pub time_limit: i32,
-    pub memory_limit: i32,
+    pub time_limit: u64,
+    pub memory_limit: u64,
     pub test_cases: Vec<Sample>,
 
     pub creator: Thing,
+    pub owner: Thing,
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
     pub mode: Mode,
     pub private: bool,
 
-    #[serde(skip)]
     pub created_at: chrono::NaiveDateTime,
-    #[serde(skip)]
     pub updated_at: chrono::NaiveDateTime,
 }
 
@@ -61,6 +57,8 @@ impl From<ProblemData<'_>> for Problem {
             memory_limit: val.memory_limit,
             test_cases: val.test_cases,
             creator: ("account", val.id).into(),
+            // owner: val.owner,
+            owner: ("account", val.id).into(),
             categories: val.categories,
             tags: val.tags,
             mode: val.mode,
@@ -69,4 +67,31 @@ impl From<ProblemData<'_>> for Problem {
             updated_at: chrono::Local::now().naive_local(),
         }
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ProblemDetail {
+    pub id: Thing,
+
+    pub title: String,
+    pub description: String,
+    pub input: Option<String>,
+    pub output: Option<String>,
+    pub samples: Vec<Sample>,
+    pub hint: Option<String>,
+
+    pub time_limit: i32,
+    pub memory_limit: i32,
+    pub test_cases: Vec<Sample>,
+
+    pub creator: Thing,
+    pub owner: Thing,
+    pub categories: Vec<String>,
+    pub tags: Vec<String>,
+
+    pub mode: Mode,
+    pub private: bool,
+
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
 }
