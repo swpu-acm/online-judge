@@ -69,7 +69,7 @@ impl From<ProblemData<'_>> for Problem {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ProblemDetail {
     pub id: Thing,
 
