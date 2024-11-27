@@ -13,7 +13,14 @@ pub struct UpdateAt {
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct Credential<'c> {
+pub struct Credentials<'c> {
     pub id: &'c str,
     pub token: &'c str,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct OwnedCredentials {
+    pub id: String,
+    pub token: String,
 }
