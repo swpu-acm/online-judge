@@ -31,3 +31,14 @@ where
 {
     Ok(db.select(("problem", id)).await?)
 }
+
+pub async fn list<M>(db: &Surreal<Client>, id: &str) -> Result<Vec<M>>
+where
+    for<'de> M: Deserialize<'de>,
+{
+    Ok(db
+        .query("SELECT * FROM problem WHERE owner = type::thing(\"account\", $id)")
+        .bind(("id", id.to_string()))
+        .await?
+        .take(0)?)
+}

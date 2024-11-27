@@ -16,9 +16,10 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        account::{Profile, Record},
+        account::Profile,
         error::{Error, ErrorResponse},
         response::{Empty, Response},
+        Record,
     },
     utils::{account, session},
     Result,

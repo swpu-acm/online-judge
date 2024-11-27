@@ -17,6 +17,7 @@ use crate::{
         error::Error,
         problem::{Mode, Problem, ProblemDetail, Sample},
         response::Response,
+        Credential,
     },
     utils::{problem, session},
     Result,
@@ -50,7 +51,7 @@ pub struct ProblemData<'r> {
     pub private: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct ProblemResponse {
     pub id: String,
@@ -125,6 +126,27 @@ pub async fn get(
         success: true,
         message: "Problem found".to_string(),
         data: Some(problem),
+    }))
+}
+
+#[post("/list", data = "<auth>")]
+pub async fn list(
+    db: &State<Surreal<Client>>,
+    auth: Json<Credential<'_>>,
+) -> Result<Vec<ProblemDetail>> {
+    if !session::verify(db, auth.id, auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid token".into())));
+    }
+
+    let problems = problem::list(db, auth.id)
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    println!("{:?}", problems);
+
+    Ok(Json(Response {
+        success: true,
+        message: "Problems found".to_string(),
+        data: Some(problems),
     }))
 }
 
@@ -234,5 +256,5 @@ pub async fn submit(
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, get, submit]
+    routes![create, get, submit, list]
 }
