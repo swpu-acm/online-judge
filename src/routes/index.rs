@@ -4,9 +4,8 @@ use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
-
 use super::problem;
-
+use super::organization;
 #[get("/")]
 async fn index() -> Result<NamedFile, std::io::Error> {
     NamedFile::open("dist/index.html").await
@@ -37,5 +36,7 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/", routes![index, files])
         .mount("/account", account::routes())
         .mount("/problem", problem::routes())
+        .mount("/org", organization::routes())
         .manage(db)
+        
 }
