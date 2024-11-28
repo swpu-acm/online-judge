@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::Deserialize;
-use surrealdb::{engine::remote::ws::Client,Surreal};
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::models::organization::{CreateOrganization, Organization};
 
@@ -9,7 +9,6 @@ pub async fn create(
     id: &str,
     org: CreateOrganization,
 ) -> Result<Option<Organization>> {
-
     Ok(db
         .create("organization")
         .content(Organization {
@@ -33,3 +32,6 @@ where
     Ok(db.select(("organization", id)).await?)
 }
 
+pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<Option<Organization>> {
+    Ok(db.delete(("organization", id)).await?)
+}

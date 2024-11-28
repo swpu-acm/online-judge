@@ -1,10 +1,16 @@
-use rocket::{serde::json::Json, State};
+use rocket::{post, serde::json::Json, tokio::fs::remove_dir_all, State};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    models::{error::Error, organization::CreateOrganization, response::Response},
+    models::{
+        error::Error,
+        organization::CreateOrganization,
+        response::{Empty, Response},
+    },
     utils::{organization, session},
+    Result,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -25,7 +31,7 @@ pub struct CreateOrgResponse {
 pub async fn create(
     db: &State<Surreal<Client>>,
     organization: Json<OrgData<'_>>,
-) -> Result<Json<Response<CreateOrgResponse>>, Error> {
+) -> Result<CreateOrgResponse> {
     if !session::verify(db, organization.id, organization.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant permission".into(),
@@ -46,6 +52,34 @@ pub async fn create(
             id: org.id.unwrap().id.to_string(),
         }),
     }))
+}
+
+#[post("/delete/<id>", data = "<organization>")]
+pub async fn delete(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    organization: Json<OrgData<'_>>,
+) -> Result<Empty> {
+    if !session::verify(db, organization.id, organization.token).await {
+        return Err(Error::Unauthorized(Json(
+            "Failed to grant permission".into(),
+        )));
+    }
+
+    organization::delete(db, id)
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+
+    remove_dir_all(Path::new("content/").join(id))
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+
+    Ok(Response {
+        success: true,
+        message: "Organization deleted successfully".into(),
+        data: None,
+    }
+    .into())
 }
 
 pub fn routes() -> Vec<rocket::Route> {
