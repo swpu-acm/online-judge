@@ -6,7 +6,7 @@ use algohub_server::{
     },
     routes::{
         account::{RegisterData, RegisterResponse},
-        problem::{ListProblem, ProblemData, ProblemResponse},
+        problem::{ListProblem, CreateProblem, ProblemResponse},
     },
 };
 use anyhow::Result;
@@ -47,7 +47,7 @@ async fn test_problem() -> Result<()> {
     for i in 0..10 {
         let response = client
             .post("/problem/create")
-            .json(&ProblemData {
+            .json(&CreateProblem {
                 id: &id,
                 token: &token,
                 title: &format!("Test Problem #{}", i),

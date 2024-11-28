@@ -2,9 +2,9 @@ use anyhow::Result;
 use serde::Deserialize;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{models::problem::Problem, routes::problem::ProblemData};
+use crate::{models::problem::Problem, routes::problem::CreateProblem};
 
-pub async fn create(db: &Surreal<Client>, problem: ProblemData<'_>) -> Result<Option<Problem>> {
+pub async fn create(db: &Surreal<Client>, problem: CreateProblem<'_>) -> Result<Option<Problem>> {
     Ok(db
         .create("problem")
         .content(Into::<Problem>::into(problem))

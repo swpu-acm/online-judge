@@ -6,7 +6,7 @@ use algohub_server::{
         response::{Empty, Response},
         Token,
     },
-    routes::account::{ProfileData, RegisterData, RegisterResponse, UploadResponse},
+    routes::account::{MergeProfile, RegisterData, RegisterResponse, UploadResponse},
 };
 use anyhow::Result;
 use rocket::{http::ContentType, local::asynchronous::Client};
@@ -91,7 +91,7 @@ async fn test_register() -> Result<()> {
 
     let response = client
         .post("/account/profile")
-        .json(&ProfileData {
+        .json(&MergeProfile {
             id: &data.id,
             token: &data.token,
             profile: Profile {
@@ -110,7 +110,6 @@ async fn test_register() -> Result<()> {
                 major: None,
                 rating: None,
                 active: None,
-                role: None,
             },
         })
         .dispatch()
