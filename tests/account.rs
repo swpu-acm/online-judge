@@ -1,13 +1,14 @@
 use std::{fs::File, io::Read, path::Path};
 
-use anyhow::Result;
 use algohub_server::{
     models::{
         account::Profile,
         response::{Empty, Response},
+        Token,
     },
-    routes::account::{Authenticate, ProfileData, RegisterData, RegisterResponse, UploadResponse},
+    routes::account::{ProfileData, RegisterData, RegisterResponse, UploadResponse},
 };
+use anyhow::Result;
 use rocket::{http::ContentType, local::asynchronous::Client};
 
 pub struct Upload {
@@ -127,8 +128,7 @@ async fn test_register() -> Result<()> {
     assert!(empty_data.is_none());
 
     let response = client
-        .post(format!("/account/profile/{}", &id))
-        .json(&Authenticate { token: &token })
+        .get(format!("/account/profile/{}", &id))
         .dispatch()
         .await;
 
@@ -169,7 +169,7 @@ async fn test_register() -> Result<()> {
 
     let response = client
         .post(format!("/account/delete/{}", id))
-        .json(&Authenticate { token: &token })
+        .json(&Token { token: &token })
         .dispatch()
         .await;
 

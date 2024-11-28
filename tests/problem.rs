@@ -2,11 +2,11 @@ use algohub_server::{
     models::{
         problem::{Mode, ProblemDetail},
         response::{Empty, Response},
-        Credential,
+        OwnedCredentials, Token,
     },
     routes::{
-        account::{Authenticate, RegisterData, RegisterResponse},
-        problem::{ProblemData, ProblemResponse},
+        account::{RegisterData, RegisterResponse},
+        problem::{ListProblem, ProblemData, ProblemResponse},
     },
 };
 use anyhow::Result;
@@ -83,9 +83,13 @@ async fn test_problem() -> Result<()> {
 
     let response = client
         .post("/problem/list")
-        .json(&Credential {
-            id: &id,
-            token: &token,
+        .json(&ListProblem {
+            id: Some(id.clone()),
+            auth: Some(OwnedCredentials {
+                id: id.clone(),
+                token: token.clone(),
+            }),
+            limit: None,
         })
         .dispatch()
         .await;
@@ -102,9 +106,34 @@ async fn test_problem() -> Result<()> {
     assert!(success);
     assert_eq!(data.len(), 10);
 
+    let response = client
+        .post("/problem/list")
+        .json(&ListProblem {
+            id: Some(id.clone()),
+            auth: Some(OwnedCredentials {
+                id: id.clone(),
+                token: token.clone(),
+            }),
+            limit: Some(3),
+        })
+        .dispatch()
+        .await;
+
+    let Response {
+        success,
+        message: _,
+        data,
+    } = response
+        .into_json::<Response<Vec<ProblemDetail>>>()
+        .await
+        .unwrap();
+    let data = data.unwrap();
+    assert!(success);
+    assert_eq!(data.len(), 3);
+
     client
         .post(format!("/account/delete/{}", id))
-        .json(&Authenticate { token: &token })
+        .json(&Token { token: &token })
         .dispatch()
         .await
         .into_json::<Response<Empty>>()

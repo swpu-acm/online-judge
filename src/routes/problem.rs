@@ -17,7 +17,7 @@ use crate::{
         error::Error,
         problem::{Mode, Problem, ProblemDetail, Sample},
         response::Response,
-        Credential,
+        OwnedCredentials,
     },
     utils::{problem, session},
     Result,
@@ -129,19 +129,33 @@ pub async fn get(
     }))
 }
 
-#[post("/list", data = "<auth>")]
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct ListProblem {
+    pub id: Option<String>,
+    pub auth: Option<OwnedCredentials>,
+    pub limit: Option<u32>,
+}
+
+#[post("/list", data = "<data>")]
 pub async fn list(
     db: &State<Surreal<Client>>,
-    auth: Json<Credential<'_>>,
+    data: Json<ListProblem>,
 ) -> Result<Vec<ProblemDetail>> {
-    if !session::verify(db, auth.id, auth.token).await {
-        return Err(Error::Unauthorized(Json("Invalid token".into())));
-    }
+    let authed_id = if let Some(auth) = &data.auth {
+        if !session::verify(db, &auth.id, &auth.token).await {
+            return Err(Error::Unauthorized(Json("Invalid token".into())));
+        };
+        Some(auth.id.clone())
+    } else {
+        None
+    };
 
-    let problems = problem::list(db, auth.id)
+    let data = data.into_inner();
+
+    let problems = problem::list_for_account(db, data.id, authed_id, data.limit)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
-    println!("{:?}", problems);
 
     Ok(Json(Response {
         success: true,
