@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.1.4]
+
+### Refactors
+
+- [`7a4e263`](https://github.com/swpu-acm/online-judge/commit/7a4e263999adfb788636025376296c862db66c44) ([#15](https://github.com/swpu-acm/online-judge/pull/15) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Refactor `surrealdb::sql::Thing` in user interface data structures.
+
+  - Use `UserRecordId` instead `surreal::sql::Thing` in structs.
+  - Remove `role` from `Account` definition.
+  - Refactor and re-export `ProblemDetail` in user interface.
+
 ## \[0.1.3]
 
 ### Refactors
