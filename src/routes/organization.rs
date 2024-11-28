@@ -32,7 +32,7 @@ pub async fn create(
         )));
     }
 
-    let org = organization::create(db, organization.into_inner().org)
+    let org = organization::create(db, organization.id, organization.into_inner().org)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::ServerError(Json(

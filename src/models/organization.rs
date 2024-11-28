@@ -24,5 +24,4 @@ pub struct CreateOrganization {
     pub name: String,
     pub display_name: Option<String>,
     pub description: Option<String>,
-    pub creator: Thing,
 }
