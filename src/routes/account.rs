@@ -19,7 +19,7 @@ use crate::{
         account::Profile,
         error::{Error, ErrorResponse},
         response::{Empty, Response},
-        Record,
+        Record, Token,
     },
     utils::{account, session},
     Result,
@@ -104,24 +104,8 @@ pub async fn profile(db: &State<Surreal<Client>>, profile: Json<ProfileData<'_>>
     }
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Authenticate<'r> {
-    pub token: &'r str,
-}
-
-#[post("/profile/<id>", data = "<auth>")]
-pub async fn get_profile(
-    db: &State<Surreal<Client>>,
-    id: &str,
-    auth: Json<Authenticate<'_>>,
-) -> Result<Profile> {
-    if !session::verify(db, id, auth.token).await {
-        return Err(Error::Unauthorized(Json(
-            "Failed to grant access permission".into(),
-        )));
-    }
-
+#[get("/profile/<id>")]
+pub async fn get_profile(db: &State<Surreal<Client>>, id: &str) -> Result<Profile> {
     let profile = account::get_by_id::<Profile>(db, id)
         .await
         .map_err(|e| Error::NotFound(Json(e.to_string().into())))?
@@ -209,11 +193,7 @@ pub async fn upload_content(
 }
 
 #[post("/delete/<id>", data = "<auth>")]
-pub async fn delete(
-    db: &State<Surreal<Client>>,
-    id: &str,
-    auth: Json<Authenticate<'_>>,
-) -> Result<Empty> {
+pub async fn delete(db: &State<Surreal<Client>>, id: &str, auth: Json<Token<'_>>) -> Result<Empty> {
     if !session::verify(db, id, auth.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant access permission".into(),
