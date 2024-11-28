@@ -24,3 +24,9 @@ pub struct OwnedCredentials {
     pub id: String,
     pub token: String,
 }
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct Token<'r> {
+    pub token: &'r str,
+}
