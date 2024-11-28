@@ -2,10 +2,10 @@ use algohub_server::{
     models::{
         problem::{Mode, ProblemDetail},
         response::{Empty, Response},
-        OwnedCredentials,
+        OwnedCredentials, Token,
     },
     routes::{
-        account::{Authenticate, RegisterData, RegisterResponse},
+        account::{RegisterData, RegisterResponse},
         problem::{ListProblem, ProblemData, ProblemFilter, ProblemResponse},
     },
 };
@@ -131,7 +131,7 @@ async fn test_problem() -> Result<()> {
 
     client
         .post(format!("/account/delete/{}", id))
-        .json(&Authenticate { token: &token })
+        .json(&Token { token: &token })
         .dispatch()
         .await
         .into_json::<Response<Empty>>()
