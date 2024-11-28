@@ -12,7 +12,7 @@ pub struct Organization {
     pub owner: Vec<Thing>,
     pub member: Vec<Thing>,
 
-    pub creator: Thing,
+    pub creator: String,
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,

@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::Deserialize;
-use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
+use surrealdb::{engine::remote::ws::Client,Surreal};
 
 use crate::models::organization::{CreateOrganization, Organization};
 
@@ -9,7 +9,7 @@ pub async fn create(
     id: &str,
     org: CreateOrganization,
 ) -> Result<Option<Organization>> {
-    let creator = Thing::from(("account", id));
+
     Ok(db
         .create("organization")
         .content(Organization {
@@ -17,9 +17,9 @@ pub async fn create(
             name: org.name,
             display_name: org.display_name,
             description: org.description,
-            owner: vec![creator.clone()],
+            owner: vec![("account", id).into()],
             member: vec![],
-            creator,
+            creator: id.to_string(),
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
         })
@@ -32,3 +32,4 @@ where
 {
     Ok(db.select(("organization", id)).await?)
 }
+
