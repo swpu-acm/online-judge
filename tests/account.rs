@@ -128,8 +128,7 @@ async fn test_register() -> Result<()> {
     assert!(empty_data.is_none());
 
     let response = client
-        .post(format!("/account/profile/{}", &id))
-        .json(&Token { token: &token })
+        .get(format!("/account/profile/{}", &id))
         .dispatch()
         .await;
 
