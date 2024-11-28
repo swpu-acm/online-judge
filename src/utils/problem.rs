@@ -2,10 +2,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{
-    models::problem::Problem,
-    routes::problem::{ProblemData, ProblemFilter},
-};
+use crate::{models::problem::Problem, routes::problem::ProblemData};
 
 pub async fn create(db: &Surreal<Client>, problem: ProblemData<'_>) -> Result<Option<Problem>> {
     Ok(db
@@ -35,24 +32,39 @@ where
     Ok(db.select(("problem", id)).await?)
 }
 
-pub async fn list<M>(
+const LIST_QUERY: &str = r#"
+IF $authed THEN
+    IF $limit THEN
+        SELECT * FROM problem WHERE owner = type::thing("account", $id) LIMIT $limit
+    ELSE
+        SELECT * FROM problem WHERE owner = type::thing("account", $id)
+    END;
+ELSE
+    IF $limit THEN
+        SELECT * FROM problem WHERE owner = type::thing("account", $id) AND private = false LIMIT $limit
+    ELSE
+        SELECT * FROM problem WHERE owner = type::thing("account", $id) AND private = false
+    END;
+END;"#;
+
+pub async fn list_for_account<M>(
     db: &Surreal<Client>,
-    id: &str,
-    filter: Option<ProblemFilter>,
+    account_id: Option<String>,
+    authed_id: Option<String>,
+    limit: Option<u32>,
 ) -> Result<Vec<M>>
 where
     for<'de> M: Deserialize<'de>,
 {
-    let filter = filter.unwrap_or(ProblemFilter::default());
-    let mut response = if let Some(limit) = filter.limit {
-        db.query("SELECT * FROM problem WHERE owner = type::thing(\"account\", $id) LIMIT $limit")
-            .bind(("id", id.to_string()))
-            .bind(("limit", limit))
-    } else {
-        db.query("SELECT * FROM problem WHERE owner = type::thing(\"account\", $id)")
-            .bind(("id", id.to_string()))
-    }
-    .await?;
+    let mut response = db
+        .query(LIST_QUERY)
+        .bind((
+            "authed",
+            authed_id.is_some() && account_id.is_some() && authed_id == account_id,
+        ))
+        .bind(("id", account_id))
+        .bind(("limit", limit))
+        .await?;
 
     Ok(response.take(0)?)
 }
