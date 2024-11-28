@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::routes::problem::ProblemData;
+use crate::routes::problem::CreateProblem;
+
+use super::UserRecordId;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Sample {
@@ -43,8 +45,8 @@ pub struct Problem {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-impl From<ProblemData<'_>> for Problem {
-    fn from(val: ProblemData<'_>) -> Self {
+impl From<CreateProblem<'_>> for Problem {
+    fn from(val: CreateProblem<'_>) -> Self {
         Problem {
             id: None,
             title: val.title.to_string(),
@@ -69,9 +71,9 @@ impl From<ProblemData<'_>> for Problem {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ProblemDetail {
-    pub id: Thing,
+    pub id: String,
 
     pub title: String,
     pub description: String,
@@ -80,12 +82,12 @@ pub struct ProblemDetail {
     pub samples: Vec<Sample>,
     pub hint: Option<String>,
 
-    pub time_limit: i32,
-    pub memory_limit: i32,
+    pub time_limit: u64,
+    pub memory_limit: u64,
     pub test_cases: Vec<Sample>,
 
-    pub creator: Thing,
-    pub owner: Thing,
+    pub creator: UserRecordId,
+    pub owner: UserRecordId,
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
@@ -94,4 +96,29 @@ pub struct ProblemDetail {
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+}
+
+impl From<Problem> for ProblemDetail {
+    fn from(value: Problem) -> Self {
+        ProblemDetail {
+            id: value.id.unwrap().id.to_string(),
+            title: value.title,
+            description: value.description,
+            input: value.input,
+            output: value.output,
+            samples: value.samples,
+            hint: value.hint,
+            time_limit: value.time_limit,
+            memory_limit: value.memory_limit,
+            test_cases: value.test_cases,
+            creator: value.creator.into(),
+            owner: value.owner.into(),
+            categories: value.categories,
+            tags: value.tags,
+            mode: value.mode,
+            private: value.private,
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+        }
+    }
 }

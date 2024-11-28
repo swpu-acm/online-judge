@@ -3,7 +3,7 @@ use serde::Deserialize;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
-use crate::models::account::{Account, Profile, Role};
+use crate::models::account::{Account, Profile};
 use crate::models::UpdateAt;
 use crate::routes::account::RegisterData;
 
@@ -24,7 +24,6 @@ pub async fn create(db: &Surreal<Client>, register: RegisterData) -> Result<Opti
             username: register.username,
             password: register.password,
             email: register.email,
-            role: Role::User,
             created_at: chrono::Local::now().naive_local(),
             ..Default::default()
         })

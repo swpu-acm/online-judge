@@ -25,7 +25,7 @@ use crate::{
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ProblemData<'r> {
+pub struct CreateProblem<'r> {
     pub id: &'r str,
     pub token: &'r str,
 
@@ -60,7 +60,7 @@ pub struct ProblemResponse {
 #[post("/create", data = "<problem>")]
 pub async fn create(
     db: &State<Surreal<Client>>,
-    problem: Json<ProblemData<'_>>,
+    problem: Json<CreateProblem<'_>>,
 ) -> Result<ProblemResponse> {
     if !session::verify(db, problem.id, problem.token).await {
         return Err(Error::Unauthorized(Json("Invalid token".into())));
@@ -95,7 +95,7 @@ pub async fn get(
     id: &str,
     auth: Json<Authenticate<'_>>,
 ) -> Result<ProblemDetail> {
-    let problem = problem::get::<ProblemDetail>(db, id)
+    let problem = problem::get::<Problem>(db, id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::NotFound(Json(
@@ -103,14 +103,13 @@ pub async fn get(
         )))?;
 
     let has_permission = if problem.private {
-        if auth.id.is_none() || auth.token.is_none() {
+        if auth.id.is_none()
+            || auth.token.is_none()
+            || !session::verify(db, auth.id.unwrap(), auth.token.unwrap()).await
+        {
             false
         } else {
-            if !session::verify(db, auth.id.unwrap(), auth.token.unwrap()).await {
-                false
-            } else {
-                auth.id.unwrap() == problem.owner.id.to_string()
-            }
+            auth.id.unwrap() == problem.owner.id.to_string()
         }
     } else {
         true
@@ -125,7 +124,7 @@ pub async fn get(
     Ok(Json(Response {
         success: true,
         message: "Problem found".to_string(),
-        data: Some(problem),
+        data: Some(problem.into()),
     }))
 }
 
@@ -153,14 +152,14 @@ pub async fn list(
 
     let data = data.into_inner();
 
-    let problems = problem::list_for_account(db, data.id, authed_id, data.limit)
+    let problems = problem::list_for_account::<Problem>(db, data.id, authed_id, data.limit)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
 
     Ok(Json(Response {
         success: true,
         message: "Problems found".to_string(),
-        data: Some(problems),
+        data: Some(problems.into_iter().map(|p| p.into()).collect()),
     }))
 }
 

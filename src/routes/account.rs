@@ -76,14 +76,14 @@ pub async fn register(
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "rocket::serde")]
-pub struct ProfileData<'r> {
+pub struct MergeProfile<'r> {
     pub id: &'r str,
     pub token: &'r str,
     pub profile: Profile,
 }
 
 #[post("/profile", data = "<profile>")]
-pub async fn profile(db: &State<Surreal<Client>>, profile: Json<ProfileData<'_>>) -> Result<Empty> {
+pub async fn profile(db: &State<Surreal<Client>>, profile: Json<MergeProfile<'_>>) -> Result<Empty> {
     account::get_by_id::<Record>(db, profile.id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
@@ -108,10 +108,8 @@ pub async fn profile(db: &State<Surreal<Client>>, profile: Json<ProfileData<'_>>
 pub async fn get_profile(db: &State<Surreal<Client>>, id: &str) -> Result<Profile> {
     let profile = account::get_by_id::<Profile>(db, id)
         .await
-        .map_err(|e| Error::NotFound(Json(e.to_string().into())))?
-        .ok_or(Error::ServerError(Json(
-            "Filter returned None unexpectedly".into(),
-        )))?;
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .ok_or(Error::NotFound(Json("Account not found".into())))?;
 
     Ok(Response {
         success: true,

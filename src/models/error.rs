@@ -7,18 +7,12 @@ pub struct ErrorResponse {
     pub message: String,
 }
 
-impl From<String> for ErrorResponse {
-    fn from(message: String) -> Self {
+impl<T: ToString> From<T> for ErrorResponse {
+    fn from(message: T) -> Self {
         Self {
             success: false,
-            message,
+            message: message.to_string(),
         }
-    }
-}
-
-impl From<&str> for ErrorResponse {
-    fn from(message: &str) -> Self {
-        Self::from(message.to_string())
     }
 }
 
