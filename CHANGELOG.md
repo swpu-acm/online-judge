@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.1.3]
+
+### Refactors
+
+- [`e51a965`](https://github.com/swpu-acm/online-judge/commit/e51a96583f773c7a7d606bec2aa77b56a4549322) ([#14](https://github.com/swpu-acm/online-judge/pull/14) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Refactored `list` method for account owned problems.
+- [`e28b7a2`](https://github.com/swpu-acm/online-judge/commit/e28b7a2c035e502a4c34dff877b0205d370b74a4) ([#12](https://github.com/swpu-acm/online-judge/pull/12) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Refactor api for getting user profile, allow get user profile anonymously
+
 ## \[0.1.2]
 
 ### feat
