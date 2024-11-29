@@ -4,6 +4,7 @@ use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
+use super::category;
 use super::problem;
 use super::organization;
 #[get("/")]
@@ -37,6 +38,7 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/account", account::routes())
         .mount("/problem", problem::routes())
         .mount("/org", organization::routes())
+        .mount("/category", category::routes())
         .manage(db)
         
 }
