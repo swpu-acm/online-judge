@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Category {   
+pub struct Category {
     pub id: Option<Thing>,
     pub owner: Thing,
     pub name: String,
