@@ -1,3 +1,4 @@
+use crate::models::UserRecordId;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -15,5 +16,5 @@ pub struct Category {
 #[serde(crate = "rocket::serde")]
 pub struct CreateCategory {
     pub name: String,
-    pub group: String,
+    pub owner: UserRecordId,
 }

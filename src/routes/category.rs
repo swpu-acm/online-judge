@@ -3,6 +3,7 @@ use crate::{
         category::{Category, CreateCategory},
         error::Error,
         response::{Empty, Response},
+        UserRecordId,
     },
     utils::{category, session},
     Result,
@@ -37,7 +38,7 @@ pub async fn create(
         )));
     }
 
-    let cat = category::create(db, category.id, category.into_inner().cat)
+    let cat = category::create(db, category.into_inner().cat)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::ServerError(Json("Failed to create category".into())))?;
@@ -79,19 +80,12 @@ pub async fn delete(
     .into())
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct GetByOwner {
-    pub group: String,
-    pub owner: String,
-}
-
 #[post("/get_by_owner", data = "<data>")]
 pub async fn get_by_owner(
     db: &State<Surreal<Client>>,
-    data: Json<GetByOwner>,
+    data: Json<UserRecordId>,
 ) -> Result<Vec<Category>> {
-    let result = category::get_by_owner(db, (data.group.clone(), data.owner.clone()).into())
+    let result = category::get_by_owner(db, data.into_inner().into())
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
 
@@ -127,5 +121,5 @@ pub async fn get_by_name(db: &State<Surreal<Client>>, data: Json<GetByName>) -> 
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, delete]
+    routes![create, delete, get_by_name, get_by_owner]
 }
