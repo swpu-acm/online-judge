@@ -59,9 +59,14 @@ pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_by_identity(db: &Surreal<Client>, identity: &str) -> Result<Option<Account>> {
+pub async fn get_by_identity<M>(db: &Surreal<Client>, identity: &str) -> Result<Option<M>>
+where
+    for<'de> M: Deserialize<'de>,
+{
     Ok(db
-        .query("SELECT * FROM account WHERE username = $identity OR email = $identity")
+        .query(
+            "SELECT * FROM account WHERE username = $identity OR email = $identity OR record::id(id) = $identity"
+        )
         .bind(("identity", identity.to_string()))
         .await?
         .take(0)?)
