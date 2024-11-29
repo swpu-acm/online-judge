@@ -7,13 +7,15 @@ pub mod utils {
     pub mod organization;
     pub mod problem;
     pub mod session;
+    pub mod category;
 }
 
 pub mod routes {
     pub mod account;
+    pub mod category;
     pub mod index;
-    pub mod problem;
     pub mod organization;
+    pub mod problem;
 }
 
 pub mod cors;

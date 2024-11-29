@@ -1,4 +1,6 @@
 use anyhow::Result;
+use surrealdb::{engine::remote::ws::Client, Surreal};
+
 use crate::models::category::{Category, CreateCategory};
 
 pub async fn create(
@@ -8,10 +10,10 @@ pub async fn create(
 ) -> Result<Option<Category>> {
     Ok(db
         .create("category")
-        .content(category {
+        .content(Category {
             id: None,
             name: cat.name,
-            owner: (cat.group, id).into(),
+            owner: (cat.group, id.to_string()).into(),
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
         })
@@ -19,5 +21,5 @@ pub async fn create(
 }
 
 pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<Option<Category>> {
-    Ok(db.delete("category", id).await?)
+    Ok(db.delete(("category", id)).await?)
 }

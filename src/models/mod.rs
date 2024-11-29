@@ -4,5 +4,6 @@ pub mod organization;
 pub mod problem;
 pub mod response;
 pub mod shared;
+pub mod category;
 
 pub use shared::*;
