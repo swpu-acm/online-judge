@@ -68,10 +68,6 @@ pub async fn delete(
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
 
-    remove_dir_all(Path::new("content/").join(id))
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
-
     Ok(Response {
         success: true,
         message: "Category deleted successfully".into(),
