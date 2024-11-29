@@ -19,7 +19,7 @@ pub struct CategoryData<'r> {
     pub id: &'r str,
     pub token: &'r str,
 
-    pub cat: CreateCategory,
+    pub data: CreateCategory,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -38,7 +38,7 @@ pub async fn create(
         )));
     }
 
-    let cat = category::create(db, category.into_inner().cat)
+    let data = category::create(db, category.into_inner().data)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::ServerError(Json("Failed to create category".into())))?;
@@ -47,7 +47,7 @@ pub async fn create(
         success: true,
         message: "Category created successfully".into(),
         data: Some(CreateCatResponse {
-            id: cat.id.unwrap().id.to_string(),
+            id: data.id.unwrap().id.to_string(),
         }),
     }))
 }
@@ -80,12 +80,17 @@ pub async fn delete(
     .into())
 }
 
-#[post("/get_by_owner", data = "<data>")]
-pub async fn get_by_owner(
+#[derive(Serialize, Deserialize)]
+pub struct ListCategories {
+    pub owner: UserRecordId,
+}
+
+#[post("/list", data = "<data>")]
+pub async fn list(
     db: &State<Surreal<Client>>,
-    data: Json<UserRecordId>,
+    data: Json<ListCategories>,
 ) -> Result<Vec<Category>> {
-    let result = category::get_by_owner(db, data.into_inner().into())
+    let result = category::list(db, data.into_inner().owner.into())
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
 
@@ -100,26 +105,7 @@ pub async fn get_by_owner(
     }))
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct GetByName {
-    pub name: String,
-}
-#[post("/get_by_name", data = "<data>")]
-pub async fn get_by_name(db: &State<Surreal<Client>>, data: Json<GetByName>) -> Result<Category> {
-    let result = category::get_by_name(db, data.name.clone())
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
-        .ok_or(Error::NotFound(Json("Category not found".into())))?;
-
-    Ok(Json(Response {
-        success: true,
-        message: "Category found successfully".to_string(),
-        data: Some(result),
-    }))
-}
-
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, delete, get_by_name, get_by_owner]
+    routes![create, delete, list]
 }
