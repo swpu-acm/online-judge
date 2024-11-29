@@ -17,3 +17,7 @@ pub async fn create(
         })
         .await?)
 }
+
+pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<Option<Category>> {
+    Ok(db.delete("category", id).await?)
+}

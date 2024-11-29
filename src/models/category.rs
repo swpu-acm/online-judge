@@ -11,9 +11,3 @@ pub struct Category {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct CreateOrganization {
-    pub name: String,
-}
