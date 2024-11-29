@@ -14,6 +14,7 @@ pub mod routes {
     pub mod index;
     pub mod problem;
     pub mod organization;
+    pub mod submission;
 }
 
 pub mod cors;
