@@ -6,7 +6,7 @@ use algohub_server::{
     },
     routes::{
         account::{RegisterData, RegisterResponse},
-        problem::{ListProblem, CreateProblem, ProblemResponse},
+        problem::{CreateProblem, ListProblem, ProblemResponse},
     },
 };
 use anyhow::Result;
@@ -84,7 +84,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),
@@ -109,7 +109,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),

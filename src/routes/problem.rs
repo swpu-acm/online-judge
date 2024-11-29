@@ -14,12 +14,13 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
+        account::Account,
         error::Error,
         problem::{Mode, Problem, ProblemDetail, Sample},
         response::Response,
         OwnedCredentials,
     },
-    utils::{problem, session},
+    utils::{account, problem, session},
     Result,
 };
 
@@ -131,7 +132,7 @@ pub async fn get(
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct ListProblem {
-    pub id: Option<String>,
+    pub identity: Option<String>,
     pub auth: Option<OwnedCredentials>,
     pub limit: Option<u32>,
 }
@@ -152,7 +153,22 @@ pub async fn list(
 
     let data = data.into_inner();
 
-    let problems = problem::list_for_account::<Problem>(db, data.id, authed_id, data.limit)
+    let account_id = if let Some(identity) = data.identity.clone() {
+        Some(
+            account::get_by_identity::<Account>(db, &identity)
+                .await
+                .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+                .ok_or(Error::Unauthorized(Json("Invalid identity".into())))?
+                .id
+                .unwrap()
+                .id
+                .to_string(),
+        )
+    } else {
+        None
+    };
+
+    let problems = problem::list_for_account::<Problem>(db, account_id, authed_id, data.limit)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
 
