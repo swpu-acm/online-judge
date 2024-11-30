@@ -8,8 +8,8 @@ pub struct Record {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserRecordId {
-    tb: String,
-    id: String,
+    pub tb: String,
+    pub id: String,
 }
 
 impl From<Thing> for UserRecordId {
@@ -21,9 +21,9 @@ impl From<Thing> for UserRecordId {
     }
 }
 
-impl Into<Thing> for UserRecordId {
-    fn into(self) -> Thing {
-        Thing::from((self.tb, self.id))
+impl From<UserRecordId> for Thing {
+    fn from(value: UserRecordId) -> Self {
+        Thing::from((value.tb, value.id))
     }
 }
 

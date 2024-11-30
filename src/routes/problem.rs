@@ -16,9 +16,9 @@ use crate::{
     models::{
         account::Account,
         error::Error,
-        problem::{Mode, Problem, ProblemDetail, Sample},
+        problem::{Problem, ProblemDetail, Sample},
         response::Response,
-        OwnedCredentials,
+        OwnedCredentials, UserRecordId,
     },
     utils::{account, problem, session},
     Result,
@@ -40,7 +40,7 @@ pub struct CreateProblem<'r> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hint: Option<String>,
 
-    // pub owner: Thing,
+    pub owner: UserRecordId,
     pub time_limit: u64,
     pub memory_limit: u64,
     pub test_cases: Vec<Sample>,
@@ -48,7 +48,6 @@ pub struct CreateProblem<'r> {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
-    pub mode: Mode,
     pub private: bool,
 }
 
