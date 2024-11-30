@@ -3,11 +3,10 @@ use serde::Deserialize;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
-use crate::models::account::{Account, Profile};
+use crate::models::account::{Account, Profile, Register};
 use crate::models::UpdateAt;
-use crate::routes::account::RegisterData;
 
-pub async fn create(db: &Surreal<Client>, register: RegisterData) -> Result<Option<Account>> {
+pub async fn create(db: &Surreal<Client>, register: Register) -> Result<Option<Account>> {
     let mut queried = db
         .query("SELECT * FROM account WHERE username = $username OR email = $email")
         .bind(("username", register.username.clone()))

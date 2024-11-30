@@ -34,8 +34,8 @@ pub enum Error {
     Forbidden(Json<ErrorResponse>),
 }
 
-impl From<String> for Error {
-    fn from(message: String) -> Self {
-        Error::ServerError(Json(ErrorResponse::from(message)))
+impl<T: ToString> From<T> for Error {
+    fn from(e: T) -> Self {
+        Error::ServerError(Json(e.into()))
     }
 }

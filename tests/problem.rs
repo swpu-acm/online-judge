@@ -1,13 +1,11 @@
 use algohub_server::{
     models::{
+        account::Register,
         problem::ProblemDetail,
         response::{Empty, Response},
         OwnedCredentials, Token, UserRecordId,
     },
-    routes::{
-        account::{RegisterData, RegisterResponse},
-        problem::{CreateProblem, ListProblem, ProblemResponse},
-    },
+    routes::problem::{CreateProblem, ListProblem, ProblemResponse},
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
@@ -21,7 +19,7 @@ async fn test_problem() -> Result<()> {
     println!("Testing register...");
     let response = client
         .post("/account/create")
-        .json(&RegisterData {
+        .json(&Register {
             username: "fu050409".to_string(),
             password: "password".to_string(),
             email: "email@example.com".to_string(),
@@ -36,13 +34,12 @@ async fn test_problem() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: RegisterResponse = data.unwrap();
+    let data: OwnedCredentials = data.unwrap();
 
     let id = data.id.clone();
     let token = data.token.clone();
 
     assert!(success);
-    println!("Registered account: {:?}", &data);
 
     for i in 0..10 {
         let response = client
