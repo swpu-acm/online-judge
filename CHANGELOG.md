@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.6]
+
+### Refactors
+
+- [`235618d`](https://github.com/swpu-acm/online-judge/commit/235618d4c4018c299df1ac4ce5ee2e3c3a4635d4) ([#24](https://github.com/swpu-acm/online-judge/pull/24) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) refactor submission
+
 ## \[0.1.5]
 
 ### Refactors
