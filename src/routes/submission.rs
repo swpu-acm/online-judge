@@ -1,16 +1,9 @@
-use rocket::{
-    serde::json::Json,
-    State,
-};
+use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    models::{
-        error::Error,
-        response::Response,
-        submission::UserSubmission,
-    },
+    models::{error::Error, response::Response, submission::UserSubmission},
     utils::{session, submission},
     Result,
 };
@@ -44,11 +37,10 @@ pub async fn submit(
             "Failed to submit, please try again later.".into(),
         )))?;
 
-        
     Ok(Json(Response {
         success: true,
         message: "Submission created successfully".to_string(),
-        data: Some(SubmitResponse{
+        data: Some(SubmitResponse {
             id: submission.id.unwrap().id.to_string(),
         }),
     }))

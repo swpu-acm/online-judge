@@ -7,7 +7,6 @@ pub async fn create<'a>(
     id: &str,
     submission: UserSubmission<'a>,
 ) -> Result<Option<Submission>> {
-
     Ok(db
         .create("submission")
         .content(Submission {
@@ -17,7 +16,7 @@ pub async fn create<'a>(
             problem_id: submission.problem_id.to_string(),
             status: crate::models::submission::Status::InQueue,
 
-            creator: ("account",id).into(),
+            creator: ("account", id).into(),
             results: vec![],
 
             created_at: chrono::Local::now().naive_local(),

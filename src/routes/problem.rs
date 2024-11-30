@@ -1,7 +1,4 @@
-use rocket::{
-    serde::json::Json,
-    State,
-};
+use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
@@ -32,7 +29,6 @@ pub struct CreateProblem<'r> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hint: Option<String>,
 
-    // pub owner: Thing,
     pub time_limit: u64,
     pub memory_limit: u64,
     pub test_cases: Vec<Sample>,
@@ -155,7 +151,6 @@ pub async fn list(
         data: Some(problems.into_iter().map(|p| p.into()).collect()),
     }))
 }
-
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
