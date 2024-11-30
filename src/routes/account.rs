@@ -1,49 +1,25 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use rocket::{
-    form::Form,
-    fs::{NamedFile, TempFile},
-    get, post, put,
-    serde::json::Json,
-    tokio::{
-        self,
-        fs::{create_dir_all, remove_dir_all, File},
-    },
-    State,
-};
+use rocket::{get, post, serde::json::Json, tokio::fs::remove_dir_all, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        account::Profile,
+        account::{Login, Profile, Register},
         error::{Error, ErrorResponse},
         response::{Empty, Response},
-        Record, Token,
+        OwnedCredentials, Record, Token,
     },
     utils::{account, session},
     Result,
 };
 
-#[derive(Serialize, Deserialize)]
-pub struct RegisterData {
-    pub username: String,
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(crate = "rocket::serde")]
-pub struct RegisterResponse {
-    pub id: String,
-    pub token: String,
-}
-
 #[post("/create", data = "<register>")]
 pub async fn register(
     db: &State<Surreal<Client>>,
-    register: Json<RegisterData>,
-) -> Result<RegisterResponse> {
+    register: Json<Register>,
+) -> Result<OwnedCredentials> {
     match account::create(db, register.into_inner()).await {
         Ok(Some(account)) => {
             let token = match session::create(db, account.id.clone().unwrap()).await {
@@ -54,7 +30,7 @@ pub async fn register(
             Ok(Response {
                 success: true,
                 message: format!("Account with id {} created successfully", &id),
-                data: Some(RegisterResponse { id, token }),
+                data: Some(OwnedCredentials { id, token }),
             }
             .into())
         }
@@ -83,7 +59,10 @@ pub struct MergeProfile<'r> {
 }
 
 #[post("/profile", data = "<profile>")]
-pub async fn profile(db: &State<Surreal<Client>>, profile: Json<MergeProfile<'_>>) -> Result<Empty> {
+pub async fn profile(
+    db: &State<Surreal<Client>>,
+    profile: Json<MergeProfile<'_>>,
+) -> Result<Empty> {
     account::get_by_id::<Record>(db, profile.id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
@@ -119,77 +98,6 @@ pub async fn get_profile(db: &State<Surreal<Client>>, id: &str) -> Result<Profil
     .into())
 }
 
-#[get("/content/<file..>")]
-pub async fn content(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("content/").join(file)).await.ok()
-}
-
-#[derive(FromForm)]
-pub struct Upload<'r> {
-    pub id: &'r str,
-    pub token: &'r str,
-    pub file: TempFile<'r>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct UploadResponse {
-    pub uri: String,
-    pub path: String,
-}
-
-#[put("/content/upload", data = "<data>")]
-pub async fn upload_content(
-    db: &State<Surreal<Client>>,
-    data: Form<Upload<'_>>,
-) -> Result<UploadResponse> {
-    if !session::verify(db, data.id, data.token).await {
-        return Err(Error::Unauthorized(Json(
-            "Failed to grant access permission".into(),
-        )));
-    }
-
-    let file_extension = data
-        .file
-        .content_type()
-        .and_then(|ext| ext.extension().map(ToString::to_string))
-        .ok_or_else(|| Error::BadRequest(Json("Invalid file type".into())))?;
-
-    let user_path = std::env::current_dir()
-        .unwrap()
-        .join("content")
-        .join(data.id);
-
-    if !user_path.exists() {
-        create_dir_all(&user_path)
-            .await
-            .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
-    }
-    let file_name = format!("{}.{}", uuid::Uuid::new_v4(), file_extension);
-    let file_path = user_path.join(&file_name);
-
-    let mut file = data
-        .file
-        .open()
-        .await
-        .map_err(|e| Error::ServerError(Json(format!("Failed to open file: {}", e).into())))?;
-    let mut output_file = File::create(&file_path)
-        .await
-        .map_err(|e| Error::ServerError(Json(format!("Failed to create file: {}", e).into())))?;
-
-    tokio::io::copy(&mut file, &mut output_file)
-        .await
-        .map_err(|e| Error::ServerError(Json(format!("Failed to save file: {}", e).into())))?;
-
-    Ok(Json(Response {
-        success: true,
-        message: "Content updated successfully".into(),
-        data: Some(UploadResponse {
-            uri: format!("/account/content/{}/{}", data.id, file_name),
-            path: format!("content/{}/{}", data.id, file_name),
-        }),
-    }))
-}
-
 #[post("/delete/<id>", data = "<auth>")]
 pub async fn delete(db: &State<Surreal<Client>>, id: &str, auth: Json<Token<'_>>) -> Result<Empty> {
     if !session::verify(db, id, auth.token).await {
@@ -212,12 +120,6 @@ pub async fn delete(db: &State<Surreal<Client>>, id: &str, auth: Json<Token<'_>>
         data: None,
     }
     .into())
-}
-
-#[derive(Deserialize)]
-pub struct Login<'r> {
-    pub identity: &'r str,
-    pub password: &'r str,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -245,13 +147,5 @@ pub async fn login(db: &State<Surreal<Client>>, login: Json<Login<'_>>) -> Resul
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![
-        register,
-        profile,
-        get_profile,
-        content,
-        upload_content,
-        delete,
-        login
-    ]
+    routes![register, profile, get_profile, delete, login]
 }

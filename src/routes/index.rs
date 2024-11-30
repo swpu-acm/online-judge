@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use super::asset;
 use super::contest;
 use super::organization;
 use super::problem;
@@ -37,6 +38,7 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
         .attach(CORS)
         .mount("/", routes![index, files])
         .mount("/account", account::routes())
+        .mount("/asset", asset::routes())
         .mount("/problem", problem::routes())
         .mount("/org", organization::routes())
         .mount("/contest", contest::routes())
