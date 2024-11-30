@@ -8,6 +8,7 @@ pub mod utils {
     pub mod organization;
     pub mod problem;
     pub mod session;
+    pub mod submission;
 }
 
 pub mod routes {
@@ -15,6 +16,7 @@ pub mod routes {
     pub mod contest;
     pub mod index;
     pub mod organization;
+    pub mod submission;
     pub mod problem;
 }
 
