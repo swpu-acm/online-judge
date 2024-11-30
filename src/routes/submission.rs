@@ -1,24 +1,21 @@
+use eval_stack::compile::Language;
 use rocket::{serde::json::Json, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        error::Error,
-        response::Response,
-        submission::{Submission, UserSubmission},
-        Credentials,
+        error::Error, response::Response, submission::Submission, Credentials, OwnedCredentials,
     },
     utils::{session, submission},
     Result,
 };
 
 #[derive(Serialize, Deserialize)]
-pub struct CreateSubmission<'r> {
-    pub id: &'r str,
-    pub token: &'r str,
-
-    pub sub: UserSubmission<'r>,
+pub struct CreateSubmission {
+    pub auth: OwnedCredentials,
+    pub code: String,
+    pub lang: Language,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -26,16 +23,18 @@ pub struct SubmitResponse {
     pub id: String,
 }
 
-#[post("/submit", data = "<data>")]
+#[post("/submit/<id>", data = "<data>")]
 pub async fn submit(
     db: &State<Surreal<Client>>,
-    data: Json<CreateSubmission<'_>>,
+    id: &str,
+    data: Json<CreateSubmission>,
 ) -> Result<SubmitResponse> {
-    if !session::verify(db, data.id, data.token).await {
+    if !session::verify(db, &data.auth.id, &data.auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid token".into())));
     }
 
-    let submission = submission::create(db, data.id, data.into_inner().sub)
+    let data = data.into_inner();
+    let submission = submission::create(db, &data.auth.id, id, data.code, data.lang)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::ServerError(Json(
@@ -67,4 +66,9 @@ pub async fn get(
         message: "Submission fetched successfully".to_string(),
         data: Some(submission.into()),
     }))
+}
+
+pub fn routes() -> Vec<rocket::Route> {
+    use rocket::routes;
+    routes![submit, get]
 }

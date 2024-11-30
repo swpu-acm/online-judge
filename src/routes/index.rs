@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use super::contest;
 use super::organization;
 use super::problem;
+use super::submission;
 use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
@@ -39,5 +40,6 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/problem", problem::routes())
         .mount("/org", organization::routes())
         .mount("/contest", contest::routes())
+        .mount("/code", submission::routes())
         .manage(db)
 }
