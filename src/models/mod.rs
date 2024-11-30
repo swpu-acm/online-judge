@@ -1,4 +1,6 @@
 pub mod account;
+pub mod asset;
+pub mod contest;
 pub mod error;
 pub mod organization;
 pub mod problem;

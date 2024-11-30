@@ -1,8 +1,8 @@
 use algohub_server::{
     models::{
-        problem::{Mode, ProblemDetail},
+        problem::ProblemDetail,
         response::{Empty, Response},
-        OwnedCredentials, Token,
+        OwnedCredentials, Token, UserRecordId,
     },
     routes::{
         account::{RegisterData, RegisterResponse},
@@ -56,13 +56,15 @@ async fn test_problem() -> Result<()> {
                 output: Some("Test Output".to_string()),
                 samples: vec![],
                 hint: None,
-
+                owner: UserRecordId {
+                    tb: "account".to_string(),
+                    id: id.clone(),
+                },
                 time_limit: 1000,
                 memory_limit: 128,
                 test_cases: vec![],
                 categories: vec![],
                 tags: vec![],
-                mode: Mode::ICPC,
                 private: true,
             })
             .dispatch()
