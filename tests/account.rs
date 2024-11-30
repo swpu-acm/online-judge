@@ -1,38 +1,50 @@
+mod utils;
+
 use std::{fs::File, io::Read, path::Path};
 
 use algohub_server::{
     models::{
-        account::Profile,
+        account::{Profile, Register},
+        asset::UserContent,
         response::{Empty, Response},
-        Token,
+        Credentials, OwnedCredentials, Token,
     },
-    routes::account::{MergeProfile, RegisterData, RegisterResponse, UploadResponse},
+    routes::account::MergeProfile,
 };
 use anyhow::Result;
 use rocket::{http::ContentType, local::asynchronous::Client};
 
-pub struct Upload {
-    pub id: String,
-    pub token: String,
-    file: File,
+pub struct Upload<'a> {
+    pub auth: Credentials<'a>,
+    pub owner_id: &'a str,
+    pub file: File,
 }
-impl AsRef<[u8]> for Upload {
+
+impl<'a> AsRef<[u8]> for Upload<'a> {
     fn as_ref(&self) -> &[u8] {
         let boundary = "boundary";
         let mut body = Vec::new();
 
         body.extend(
             format!(
-                "--{boundary}\r\nContent-Disposition: form-data; name=\"id\"\r\n\r\n{}\r\n",
-                self.id
+                "--{boundary}\r\nContent-Disposition: form-data; name=\"auth[id]\"\r\n\r\n{}\r\n",
+                self.auth.id
             )
             .as_bytes(),
         );
 
         body.extend(
             format!(
-                "--{boundary}\r\nContent-Disposition: form-data; name=\"token\"\r\n\r\n{}\r\n",
-                self.token
+                "--{boundary}\r\nContent-Disposition: form-data; name=\"auth[token]\"\r\n\r\n{}\r\n",
+                self.auth.token
+            )
+            .as_bytes(),
+        );
+
+        body.extend(
+            format!(
+                "--{boundary}\r\nContent-Disposition: form-data; name=\"owner\"\r\n\r\naccount:{}\r\n",
+                self.owner_id
             )
             .as_bytes(),
         );
@@ -66,7 +78,7 @@ async fn test_register() -> Result<()> {
     println!("Testing register...");
     let response = client
         .post("/account/create")
-        .json(&RegisterData {
+        .json(&Register {
             username: "fu050409".to_string(),
             password: "password".to_string(),
             email: "email@example.com".to_string(),
@@ -81,13 +93,12 @@ async fn test_register() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: RegisterResponse = data.unwrap();
+    let data: OwnedCredentials = data.unwrap();
 
     let id = data.id.clone();
     let token = data.token.clone();
 
     assert!(success);
-    println!("Registered account: {:?}", &data);
 
     let response = client
         .post("/account/profile")
@@ -144,11 +155,14 @@ async fn test_register() -> Result<()> {
     assert_eq!(data.name, Some("苏向夜".into()));
 
     let response = client
-        .put("/account/content/upload")
+        .put("/asset/upload")
         .header(ContentType::new("multipart", "form-data").with_params(("boundary", "boundary")))
         .body(Upload {
-            id: id.clone(),
-            token: token.clone(),
+            auth: Credentials {
+                id: &id,
+                token: &token,
+            },
+            owner_id: &id,
             file: File::open("tests/test.png")?,
         })
         .dispatch()
@@ -161,10 +175,9 @@ async fn test_register() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: UploadResponse = data.unwrap();
+    let _: UserContent = data.unwrap();
 
     assert!(success);
-    assert!(data.uri.starts_with("/account/content/"));
 
     let response = client
         .post(format!("/account/delete/{}", id))

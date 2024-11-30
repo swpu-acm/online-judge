@@ -1,3 +1,4 @@
+use rocket::form::{FromForm, FromFormField};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -8,8 +9,30 @@ pub struct Record {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserRecordId {
-    tb: String,
-    id: String,
+    pub tb: String,
+    pub id: String,
+}
+
+#[rocket::async_trait]
+impl<'v> FromFormField<'v> for UserRecordId {
+    fn from_value(field: rocket::form::ValueField<'v>) -> rocket::form::Result<'v, Self> {
+        if let Some((tb, id)) = field.value.split_once(':') {
+            Ok(UserRecordId {
+                tb: tb.to_string(),
+                id: id.to_string(),
+            })
+        } else {
+            Err(field.unexpected())?
+        }
+    }
+
+    async fn from_data(field: rocket::form::DataField<'v, '_>) -> rocket::form::Result<'v, Self> {
+        Err(field.unexpected())?
+    }
+
+    fn default() -> Option<Self> {
+        None
+    }
 }
 
 impl From<Thing> for UserRecordId {
@@ -21,9 +44,9 @@ impl From<Thing> for UserRecordId {
     }
 }
 
-impl Into<Thing> for UserRecordId {
-    fn into(self) -> Thing {
-        Thing::from((self.tb, self.id))
+impl From<UserRecordId> for Thing {
+    fn from(value: UserRecordId) -> Self {
+        Thing::from((value.tb, value.id))
     }
 }
 
@@ -32,7 +55,7 @@ pub struct UpdateAt {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(FromForm, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Credentials<'c> {
     pub id: &'c str,

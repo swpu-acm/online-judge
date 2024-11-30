@@ -3,11 +3,10 @@ use serde::Deserialize;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 
-use crate::models::account::{Account, Profile};
+use crate::models::account::{Account, Profile, Register};
 use crate::models::UpdateAt;
-use crate::routes::account::RegisterData;
 
-pub async fn create(db: &Surreal<Client>, register: RegisterData) -> Result<Option<Account>> {
+pub async fn create(db: &Surreal<Client>, register: Register) -> Result<Option<Account>> {
     let mut queried = db
         .query("SELECT * FROM account WHERE username = $username OR email = $email")
         .bind(("username", register.username.clone()))
@@ -59,9 +58,14 @@ pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_by_identity(db: &Surreal<Client>, identity: &str) -> Result<Option<Account>> {
+pub async fn get_by_identity<M>(db: &Surreal<Client>, identity: &str) -> Result<Option<M>>
+where
+    for<'de> M: Deserialize<'de>,
+{
     Ok(db
-        .query("SELECT * FROM account WHERE username = $identity OR email = $identity")
+        .query(
+            "SELECT * FROM account WHERE username = $identity OR email = $identity OR record::id(id) = $identity"
+        )
         .bind(("identity", identity.to_string()))
         .await?
         .take(0)?)

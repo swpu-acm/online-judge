@@ -1,12 +1,15 @@
 use std::path::{Path, PathBuf};
 
+use super::asset;
+use super::contest;
+use super::organization;
+use super::problem;
+use super::submission;
+use super::category;
 use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
-use super::category;
-use super::problem;
-use super::organization;
 #[get("/")]
 async fn index() -> Result<NamedFile, std::io::Error> {
     NamedFile::open("dist/index.html").await
@@ -36,9 +39,12 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
         .attach(CORS)
         .mount("/", routes![index, files])
         .mount("/account", account::routes())
+        .mount("/asset", asset::routes())
         .mount("/problem", problem::routes())
         .mount("/org", organization::routes())
         .mount("/category", category::routes())
+
+        .mount("/contest", contest::routes())
+        .mount("/code", submission::routes())
         .manage(db)
-        
 }

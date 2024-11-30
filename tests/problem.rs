@@ -1,13 +1,11 @@
 use algohub_server::{
     models::{
-        problem::{Mode, ProblemDetail},
+        account::Register,
+        problem::ProblemDetail,
         response::{Empty, Response},
-        OwnedCredentials, Token,
+        OwnedCredentials, Token, UserRecordId,
     },
-    routes::{
-        account::{RegisterData, RegisterResponse},
-        problem::{ListProblem, CreateProblem, ProblemResponse},
-    },
+    routes::problem::{CreateProblem, ListProblem, ProblemResponse},
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
@@ -21,7 +19,7 @@ async fn test_problem() -> Result<()> {
     println!("Testing register...");
     let response = client
         .post("/account/create")
-        .json(&RegisterData {
+        .json(&Register {
             username: "fu050409".to_string(),
             password: "password".to_string(),
             email: "email@example.com".to_string(),
@@ -36,13 +34,12 @@ async fn test_problem() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: RegisterResponse = data.unwrap();
+    let data: OwnedCredentials = data.unwrap();
 
     let id = data.id.clone();
     let token = data.token.clone();
 
     assert!(success);
-    println!("Registered account: {:?}", &data);
 
     for i in 0..10 {
         let response = client
@@ -56,13 +53,15 @@ async fn test_problem() -> Result<()> {
                 output: Some("Test Output".to_string()),
                 samples: vec![],
                 hint: None,
-
+                owner: UserRecordId {
+                    tb: "account".to_string(),
+                    id: id.clone(),
+                },
                 time_limit: 1000,
                 memory_limit: 128,
                 test_cases: vec![],
                 categories: vec![],
                 tags: vec![],
-                mode: Mode::ICPC,
                 private: true,
             })
             .dispatch()
@@ -84,7 +83,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),
@@ -109,7 +108,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),

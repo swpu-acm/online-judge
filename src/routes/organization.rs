@@ -84,5 +84,5 @@ pub async fn delete(
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create]
+    routes![create, delete]
 }

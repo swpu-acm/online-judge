@@ -11,13 +11,6 @@ pub struct Sample {
     pub output: String,
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-pub enum Mode {
-    #[default]
-    ICPC,
-    OI,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Problem {
     pub id: Option<Thing>,
@@ -38,7 +31,6 @@ pub struct Problem {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
-    pub mode: Mode,
     pub private: bool,
 
     pub created_at: chrono::NaiveDateTime,
@@ -59,11 +51,9 @@ impl From<CreateProblem<'_>> for Problem {
             memory_limit: val.memory_limit,
             test_cases: val.test_cases,
             creator: ("account", val.id).into(),
-            // owner: val.owner,
-            owner: ("account", val.id).into(),
+            owner: val.owner.into(),
             categories: val.categories,
             tags: val.tags,
-            mode: val.mode,
             private: val.private,
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
@@ -91,7 +81,6 @@ pub struct ProblemDetail {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
-    pub mode: Mode,
     pub private: bool,
 
     pub created_at: chrono::NaiveDateTime,
@@ -115,7 +104,6 @@ impl From<Problem> for ProblemDetail {
             owner: value.owner.into(),
             categories: value.categories,
             tags: value.tags,
-            mode: value.mode,
             private: value.private,
             created_at: value.created_at,
             updated_at: value.updated_at,

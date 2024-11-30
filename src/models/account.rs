@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Account {
     pub id: Option<Thing>,
     pub username: String,
@@ -26,6 +26,20 @@ pub struct Account {
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct Register {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Deserialize)]
+pub struct Login<'r> {
+    pub identity: &'r str,
+    pub password: &'r str,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.1.6]
+
+### Refactors
+
+- [`235618d`](https://github.com/swpu-acm/online-judge/commit/235618d4c4018c299df1ac4ce5ee2e3c3a4635d4) ([#24](https://github.com/swpu-acm/online-judge/pull/24) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) refactor submission
+
+## \[0.1.5]
+
+### Refactors
+
+- [`0797749`](https://github.com/swpu-acm/online-judge/commit/079774945731e11abed54382cbfb0cc54f6863f8) ([#20](https://github.com/swpu-acm/online-judge/pull/20) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Allow get account by its surrealdb id (`Thing`).
+
 ## \[0.1.4]
 
 ### Refactors
