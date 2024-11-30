@@ -3,7 +3,12 @@ use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
-    models::{error::Error, response::Response, submission::UserSubmission},
+    models::{
+        error::Error,
+        response::Response,
+        submission::{Submission, UserSubmission},
+        Credentials,
+    },
     utils::{session, submission},
     Result,
 };
@@ -43,5 +48,23 @@ pub async fn submit(
         data: Some(SubmitResponse {
             id: submission.id.unwrap().id.to_string(),
         }),
+    }))
+}
+
+#[post("/get/<id>", data = "<_auth>")]
+pub async fn get(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    _auth: Json<Credentials<'_>>,
+) -> Result<Submission> {
+    let submission = submission::get_by_id(db, id)
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "Submission fetched successfully".to_string(),
+        data: Some(submission.into()),
     }))
 }

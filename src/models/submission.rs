@@ -30,5 +30,5 @@ pub struct UserSubmission<'r> {
     pub lang: Language,
     pub problem_id: &'r str,
     pub code: String,
-    pub status: Status,
+    pub private: bool,
 }

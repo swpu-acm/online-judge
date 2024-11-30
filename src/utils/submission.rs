@@ -24,3 +24,7 @@ pub async fn create<'a>(
         })
         .await?)
 }
+
+pub async fn get_by_id(db: &Surreal<Client>, id: &str) -> Result<Option<Submission>> {
+    Ok(db.select(("submission", id)).await?)
+}
