@@ -4,6 +4,7 @@ extern crate rocket;
 pub mod models;
 pub mod utils {
     pub mod account;
+    pub mod contest;
     pub mod organization;
     pub mod problem;
     pub mod session;
@@ -12,10 +13,11 @@ pub mod utils {
 
 pub mod routes {
     pub mod account;
+    pub mod contest;
     pub mod index;
-    pub mod problem;
     pub mod organization;
     pub mod submission;
+    pub mod problem;
 }
 
 pub mod cors;

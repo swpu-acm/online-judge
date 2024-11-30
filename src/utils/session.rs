@@ -1,7 +1,7 @@
 use anyhow::Result;
 use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::account::Session;
+use crate::models::account::{Account, Session};
 
 use super::account;
 
@@ -41,7 +41,7 @@ pub async fn authenticate(
     identity: &str,
     password: &str,
 ) -> Result<Option<Session>> {
-    let account = account::get_by_identity(db, identity).await?;
+    let account = account::get_by_identity::<Account>(db, identity).await?;
     if account.is_none() {
         return Ok(None);
     };
