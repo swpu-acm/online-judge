@@ -8,9 +8,8 @@ use crate::{
     utils::{category, session},
     Result,
 };
-use rocket::{post, serde::json::Json, tokio::fs::remove_dir_all, State};
+use rocket::{post, serde::json::Json, State};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[derive(Serialize, Deserialize)]
