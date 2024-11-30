@@ -1,5 +1,16 @@
 # Changelog
 
+## \[0.1.7]
+
+### Refactors
+
+- [`46477a6`](https://github.com/swpu-acm/online-judge/commit/46477a63bd9e1319f805114e8499e93699ad0095) ([#28](https://github.com/swpu-acm/online-judge/pull/28) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Full rewrite all api endpoints of assets.
+- [`c2d07a2`](https://github.com/swpu-acm/online-judge/commit/c2d07a2c778ac676689c796e450c67ac7d10034f) ([#26](https://github.com/swpu-acm/online-judge/pull/26) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Rewrite the model of submission.
+
+### category
+
+- [`a17fe67`](https://github.com/swpu-acm/online-judge/commit/a17fe67eec9d281ab3037809973326c640763159) ([#29](https://github.com/swpu-acm/online-judge/pull/29) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) support category
+
 ## \[0.1.6]
 
 ### Refactors
