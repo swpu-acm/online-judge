@@ -1,12 +1,12 @@
 use algohub_server::{
     models::{
-        problem::{Mode, ProblemDetail},
+        problem::ProblemDetail,
         response::{Empty, Response},
-        OwnedCredentials, Token,
+        OwnedCredentials, Token, UserRecordId,
     },
     routes::{
         account::{RegisterData, RegisterResponse},
-        problem::{ListProblem, CreateProblem, ProblemResponse},
+        problem::{CreateProblem, ListProblem, ProblemResponse},
     },
 };
 use anyhow::Result;
@@ -56,13 +56,15 @@ async fn test_problem() -> Result<()> {
                 output: Some("Test Output".to_string()),
                 samples: vec![],
                 hint: None,
-
+                owner: UserRecordId {
+                    tb: "account".to_string(),
+                    id: id.clone(),
+                },
                 time_limit: 1000,
                 memory_limit: 128,
                 test_cases: vec![],
                 categories: vec![],
                 tags: vec![],
-                mode: Mode::ICPC,
                 private: true,
             })
             .dispatch()
@@ -84,7 +86,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),
@@ -109,7 +111,7 @@ async fn test_problem() -> Result<()> {
     let response = client
         .post("/problem/list")
         .json(&ListProblem {
-            id: Some(id.clone()),
+            identity: Some(id.clone()),
             auth: Some(OwnedCredentials {
                 id: id.clone(),
                 token: token.clone(),

@@ -106,7 +106,7 @@ pub async fn profile(db: &State<Surreal<Client>>, profile: Json<MergeProfile<'_>
 
 #[get("/profile/<id>")]
 pub async fn get_profile(db: &State<Surreal<Client>>, id: &str) -> Result<Profile> {
-    let profile = account::get_by_id::<Profile>(db, id)
+    let profile = account::get_by_identity::<Profile>(db, id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::NotFound(Json("Account not found".into())))?;
