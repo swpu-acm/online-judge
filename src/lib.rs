@@ -5,6 +5,7 @@ pub mod models;
 pub mod utils {
     pub mod account;
     pub mod asset;
+    pub mod category;
     pub mod contest;
     pub mod organization;
     pub mod problem;
@@ -15,9 +16,11 @@ pub mod utils {
 pub mod routes {
     pub mod account;
     pub mod asset;
+    pub mod category;
     pub mod contest;
     pub mod index;
     pub mod organization;
+
     pub mod problem;
     pub mod submission;
 }
