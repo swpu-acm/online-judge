@@ -44,7 +44,7 @@ async fn test_organization() -> Result<()> {
     assert!(success);
 
     let response = client
-        .post("/organization/create")
+        .post("/org/create")
         .json(&OrgData {
             id: &id,
             token: &token,
@@ -70,7 +70,7 @@ async fn test_organization() -> Result<()> {
     println!("Created organization: {}", data.id);
 
     let response = client
-        .post(format!("/organization/delete/{}", id))
+        .post(format!("/org/delete/{}", id))
         .json(&OrgData {
             id: &id,
             token: &token,
