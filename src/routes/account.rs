@@ -1,12 +1,11 @@
 use std::path::Path;
 
 use rocket::{get, post, serde::json::Json, tokio::fs::remove_dir_all, State};
-use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        account::{Login, Profile, Register},
+        account::{Login, MergeProfile, Profile, Register},
         error::{Error, ErrorResponse},
         response::{Empty, Response},
         OwnedCredentials, Record, Token,
@@ -48,14 +47,6 @@ pub async fn register(
             .into(),
         )),
     }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(crate = "rocket::serde")]
-pub struct MergeProfile<'r> {
-    pub id: &'r str,
-    pub token: &'r str,
-    pub profile: Profile,
 }
 
 #[post("/profile", data = "<profile>")]
@@ -122,14 +113,11 @@ pub async fn delete(db: &State<Surreal<Client>>, id: &str, auth: Json<Token<'_>>
     .into())
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct LoginResponse {
-    pub id: String,
-    pub token: String,
-}
-
 #[post("/login", data = "<login>")]
-pub async fn login(db: &State<Surreal<Client>>, login: Json<Login<'_>>) -> Result<LoginResponse> {
+pub async fn login(
+    db: &State<Surreal<Client>>,
+    login: Json<Login<'_>>,
+) -> Result<OwnedCredentials> {
     let session = session::authenticate(db, login.identity, login.password)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
@@ -137,7 +125,7 @@ pub async fn login(db: &State<Surreal<Client>>, login: Json<Login<'_>>) -> Resul
     Ok(Response {
         success: true,
         message: "Login successful".into(),
-        data: Some(LoginResponse {
+        data: Some(OwnedCredentials {
             id: session.account_id.id.to_string(),
             token: session.token.clone(),
         }),

@@ -1,5 +1,4 @@
 use rocket::{serde::json::Json, State};
-use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 use crate::{
@@ -7,21 +6,14 @@ use crate::{
         contest::{AddProblems, CreateContest},
         error::Error,
         response::{Empty, Response},
+        OwnedId,
     },
     utils::{contest, session},
     Result,
 };
 
-#[derive(Serialize, Deserialize)]
-pub struct CreateResponse {
-    pub id: String,
-}
-
 #[post("/create", data = "<contest>")]
-pub async fn create(
-    db: &State<Surreal<Client>>,
-    contest: Json<CreateContest>,
-) -> Result<CreateResponse> {
+pub async fn create(db: &State<Surreal<Client>>, contest: Json<CreateContest>) -> Result<OwnedId> {
     if !session::verify(db, &contest.auth.id, &contest.auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid session".into())));
     }
@@ -35,7 +27,7 @@ pub async fn create(
     Ok(Json(Response {
         success: true,
         message: "Contest created successfully".into(),
-        data: Some(CreateResponse {
+        data: Some(OwnedId {
             id: contest.id.unwrap().id.to_string(),
         }),
     }))

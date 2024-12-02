@@ -86,3 +86,11 @@ pub struct Session {
     pub account_id: Thing,
     pub token: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct MergeProfile<'r> {
+    pub id: &'r str,
+    pub token: &'r str,
+    pub profile: Profile,
+}

@@ -21,4 +21,7 @@ jobs:
             --user root --pass root
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
-      - run: cargo test --verbose --all-features
+      - name: Test
+        run: cargo test --verbose --all-features
+      - name: Lint
+        run: cargo fmt --all -- --check && cargo clippy --all-features -- -D warnings

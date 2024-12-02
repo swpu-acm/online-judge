@@ -1,7 +1,6 @@
 use rocket::{
     form::Form,
     fs::NamedFile,
-    response::Responder,
     serde::json::Json,
     tokio::fs::{create_dir_all, File},
     State,
@@ -10,7 +9,7 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     models::{
-        asset::{CreateAsset, UserContent},
+        asset::{AssetFile, CreateAsset, UserContent},
         error::Error,
         response::{Empty, Response},
         Credentials,
@@ -82,16 +81,6 @@ pub async fn upload(
     }))
 }
 
-pub struct AssetFile(NamedFile);
-
-impl<'r, 'o: 'r> Responder<'r, 'o> for AssetFile {
-    fn respond_to(self, req: &rocket::Request) -> rocket::response::Result<'o> {
-        rocket::Response::build_from(self.0.respond_to(req)?)
-            .raw_header("Cache-control", "max-age=86400") //  24h (24*60*60)
-            .ok()
-    }
-}
-
 #[get("/<id>")]
 pub async fn get(db: &State<Surreal<Client>>, id: &str) -> Option<AssetFile> {
     let asset = asset::get_by_id(db, id).await.ok()??;
@@ -113,7 +102,7 @@ pub async fn delete(
 
     let asset = asset::get_by_id(db, id)
         .await
-        .map_err(|e| Error::from(e))?
+        .map_err(Error::from)?
         .ok_or(Error::NotFound(Json("Asset not found".into())))?;
 
     rocket::tokio::fs::remove_file(&asset.path)

@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 
-use rocket::fs::TempFile;
+use rocket::{
+    fs::{NamedFile, TempFile},
+    response::Responder,
+};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -24,4 +27,14 @@ pub struct CreateAsset<'a> {
 #[derive(Serialize, Deserialize)]
 pub struct UserContent {
     pub id: String,
+}
+
+pub struct AssetFile(pub(crate) NamedFile);
+
+impl<'r, 'o: 'r> Responder<'r, 'o> for AssetFile {
+    fn respond_to(self, req: &rocket::Request) -> rocket::response::Result<'o> {
+        rocket::Response::build_from(self.0.respond_to(req)?)
+            .raw_header("Cache-control", "max-age=86400") //  24h (24*60*60)
+            .ok()
+    }
 }

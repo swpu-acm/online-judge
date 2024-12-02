@@ -1,14 +1,14 @@
 use anyhow::{Ok, Result};
 use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::category::{Category, CreateCategory};
+use crate::models::category::{Category, CategoryData};
 
-pub async fn create(db: &Surreal<Client>, data: CreateCategory) -> Result<Option<Category>> {
+pub async fn create(db: &Surreal<Client>, data: CategoryData<'_>) -> Result<Option<Category>> {
     Ok(db
         .create("category")
         .content(Category {
             id: None,
-            name: data.name,
+            name: data.name.to_string(),
             owner: data.owner.into(),
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),

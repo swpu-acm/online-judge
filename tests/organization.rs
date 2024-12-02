@@ -1,13 +1,10 @@
 use std::path::Path;
 
-use algohub_server::{
-    models::{
-        account::Register,
-        organization::CreateOrganization,
-        response::{Empty, Response},
-        OwnedCredentials, Token,
-    },
-    routes::organization::{CreateOrgResponse, OrgData},
+use algohub_server::models::{
+    account::Register,
+    organization::{CreateOrganization, OrganizationData},
+    response::{Empty, Response},
+    Credentials, OwnedCredentials, OwnedId, Token,
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
@@ -45,11 +42,11 @@ async fn test_organization() -> Result<()> {
 
     let response = client
         .post("/org/create")
-        .json(&OrgData {
+        .json(&CreateOrganization {
             id: &id,
             token: &token,
-            org: CreateOrganization {
-                name: "test_organization".to_string(),
+            org: OrganizationData {
+                name: "test_organization",
                 display_name: None,
                 description: None,
             },
@@ -64,21 +61,16 @@ async fn test_organization() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: CreateOrgResponse = data.unwrap();
+    let data: OwnedId = data.unwrap();
 
     assert!(success);
     println!("Created organization: {}", data.id);
 
     let response = client
         .post(format!("/org/delete/{}", id))
-        .json(&OrgData {
+        .json(&Credentials {
             id: &id,
             token: &token,
-            org: CreateOrganization {
-                name: "test_organization".to_string(),
-                display_name: None,
-                description: None,
-            },
         })
         .dispatch()
         .await;

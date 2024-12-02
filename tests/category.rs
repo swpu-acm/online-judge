@@ -1,11 +1,8 @@
-use algohub_server::{
-    models::{
-        account::Register,
-        category::CreateCategory,
-        response::{Empty, Response},
-        OwnedCredentials, Token, UserRecordId,
-    },
-    routes::category::{CategoryData, CreateCatResponse},
+use algohub_server::models::{
+    account::Register,
+    category::{CategoryData, CreateCategory},
+    response::{Empty, Response},
+    OwnedCredentials, OwnedId, Token, UserRecordId,
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
@@ -42,11 +39,11 @@ async fn test_category() -> Result<()> {
 
     let response = client
         .post("/category/create")
-        .json(&CategoryData {
+        .json(&CreateCategory {
             id: &id,
             token: &token,
-            data: CreateCategory {
-                name: "test_category".to_string(),
+            data: CategoryData {
+                name: "test_category",
                 owner: UserRecordId {
                     tb: "account".to_string(),
                     id: id.clone(),
@@ -63,18 +60,18 @@ async fn test_category() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: CreateCatResponse = data.unwrap();
+    let data: OwnedId = data.unwrap();
 
     assert!(success);
     println!("Created category: {}", data.id);
 
     let response = client
         .post(format!("/category/delete/{}", data.id))
-        .json(&CategoryData {
+        .json(&CreateCategory {
             id: &id,
             token: &token,
-            data: CreateCategory {
-                name: "test_category".to_string(),
+            data: CategoryData {
+                name: "test_category",
                 owner: UserRecordId {
                     tb: "account".to_string(),
                     id: id.clone(),
