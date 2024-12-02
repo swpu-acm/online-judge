@@ -1,5 +1,4 @@
 use rocket::{post, serde::json::Json, tokio::fs::remove_dir_all, State};
-use serde::{Deserialize, Serialize};
 use std::path::Path;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
@@ -8,37 +7,24 @@ use crate::{
         error::Error,
         organization::CreateOrganization,
         response::{Empty, Response},
+        Credentials, OwnedId,
     },
     utils::{organization, session},
     Result,
 };
 
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct OrgData<'r> {
-    pub id: &'r str,
-    pub token: &'r str,
-
-    pub org: CreateOrganization,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct CreateOrgResponse {
-    pub id: String,
-}
-
-#[post("/create", data = "<organization>")]
+#[post("/create", data = "<org>")]
 pub async fn create(
     db: &State<Surreal<Client>>,
-    organization: Json<OrgData<'_>>,
-) -> Result<CreateOrgResponse> {
-    if !session::verify(db, organization.id, organization.token).await {
+    org: Json<CreateOrganization<'_>>,
+) -> Result<OwnedId> {
+    if !session::verify(db, org.id, org.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant permission".into(),
         )));
     }
 
-    let org = organization::create(db, organization.id, organization.into_inner().org)
+    let org = organization::create(db, org.id, org.into_inner().org)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
         .ok_or(Error::ServerError(Json(
@@ -48,19 +34,19 @@ pub async fn create(
     Ok(Json(Response {
         success: true,
         message: "Organization created successfully".to_string(),
-        data: Some(CreateOrgResponse {
+        data: Some(OwnedId {
             id: org.id.unwrap().id.to_string(),
         }),
     }))
 }
 
-#[post("/delete/<id>", data = "<organization>")]
+#[post("/delete/<id>", data = "<org>")]
 pub async fn delete(
     db: &State<Surreal<Client>>,
     id: &str,
-    organization: Json<OrgData<'_>>,
+    org: Json<Credentials<'_>>,
 ) -> Result<Empty> {
-    if !session::verify(db, organization.id, organization.token).await {
+    if !session::verify(db, org.id, org.token).await {
         return Err(Error::Unauthorized(Json(
             "Failed to grant permission".into(),
         )));

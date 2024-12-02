@@ -2,22 +2,22 @@ use anyhow::Result;
 use serde::Deserialize;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::models::organization::{CreateOrganization, Organization};
+use crate::models::organization::{Organization, OrganizationData};
 
 pub async fn create(
     db: &Surreal<Client>,
     id: &str,
-    org: CreateOrganization,
+    org: OrganizationData<'_>,
 ) -> Result<Option<Organization>> {
     Ok(db
         .create("organization")
         .content(Organization {
             id: None,
-            name: org.name,
+            name: org.name.to_string(),
             display_name: org.display_name,
             description: org.description,
-            owner: vec![("account", id).into()],
-            member: vec![],
+            owners: vec![("account", id).into()],
+            members: vec![],
             creator: id.to_string(),
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),

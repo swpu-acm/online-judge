@@ -14,7 +14,21 @@ pub struct Category {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct CreateCategory {
-    pub name: String,
+pub struct CategoryData<'c> {
+    pub name: &'c str,
+    pub owner: UserRecordId,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CreateCategory<'r> {
+    pub id: &'r str,
+    pub token: &'r str,
+
+    pub data: CategoryData<'r>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ListCategories {
     pub owner: UserRecordId,
 }

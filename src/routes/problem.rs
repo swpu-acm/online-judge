@@ -8,7 +8,7 @@ use crate::{
         error::Error,
         problem::{Problem, ProblemDetail, Sample},
         response::Response,
-        OwnedCredentials, UserRecordId,
+        Credentials, OwnedCredentials, UserRecordId,
     },
     utils::{account, problem, session},
     Result,
@@ -72,18 +72,11 @@ pub async fn create(
     }))
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Authenticate<'r> {
-    pub id: Option<&'r str>,
-    pub token: Option<&'r str>,
-}
-
 #[post("/get/<id>", data = "<auth>")]
 pub async fn get(
     db: &State<Surreal<Client>>,
     id: &str,
-    auth: Json<Authenticate<'_>>,
+    auth: Json<Option<Credentials<'_>>>,
 ) -> Result<ProblemDetail> {
     let problem = problem::get::<Problem>(db, id)
         .await
@@ -93,13 +86,14 @@ pub async fn get(
         )))?;
 
     let has_permission = if problem.private {
-        if auth.id.is_none()
-            || auth.token.is_none()
-            || !session::verify(db, auth.id.unwrap(), auth.token.unwrap()).await
-        {
-            false
+        if let Some(auth) = auth.as_ref() {
+            if !session::verify(db, auth.id, auth.token).await {
+                return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+            } else {
+                auth.id == problem.owner.id.to_string()
+            }
         } else {
-            auth.id.unwrap() == problem.owner.id.to_string()
+            false
         }
     } else {
         true

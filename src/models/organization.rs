@@ -9,8 +9,8 @@ pub struct Organization {
 
     pub description: Option<String>,
 
-    pub owner: Vec<Thing>,
-    pub member: Vec<Thing>,
+    pub owners: Vec<Thing>,
+    pub members: Vec<Thing>,
 
     pub creator: String,
 
@@ -20,8 +20,17 @@ pub struct Organization {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct CreateOrganization {
-    pub name: String,
+pub struct OrganizationData<'c> {
+    pub name: &'c str,
     pub display_name: Option<String>,
     pub description: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CreateOrganization<'r> {
+    pub id: &'r str,
+    pub token: &'r str,
+
+    pub org: OrganizationData<'r>,
 }

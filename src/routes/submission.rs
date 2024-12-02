@@ -64,7 +64,7 @@ pub async fn get(
     Ok(Json(Response {
         success: true,
         message: "Submission fetched successfully".to_string(),
-        data: Some(submission.into()),
+        data: Some(submission),
     }))
 }
 
