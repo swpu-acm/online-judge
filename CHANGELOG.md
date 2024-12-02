@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.1.8]
+
+### New Features
+
+- [`dde16a7`](https://github.com/swpu-acm/online-judge/commit/dde16a7c338649f873de25f5fa5d2fa61b6501ff) ([#34](https://github.com/swpu-acm/online-judge/pull/34) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Optimize data structures and code for better performance.
+
+  Also, make the codes more readable and easier to maintain.
+
+### Chores
+
+- [`439002c`](https://github.com/swpu-acm/online-judge/commit/439002c7fcf73c97787f02a4ff75a9949cbf9ba4) ([#32](https://github.com/swpu-acm/online-judge/pull/32) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Bump `eval-stack` to `v0.2.0`.
+
 ## \[0.1.7]
 
 ### Refactors
