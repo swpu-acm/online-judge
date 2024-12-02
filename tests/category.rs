@@ -1,6 +1,6 @@
 use algohub_server::models::{
     account::Register,
-    category::{CategoryData, CreateCategory},
+    category::{Category, CategoryData, CreateCategory, ListCategories},
     response::{Empty, Response},
     OwnedCredentials, OwnedId, Token, UserRecordId,
 };
@@ -37,17 +37,45 @@ async fn test_category() -> Result<()> {
 
     assert!(success);
 
-    let response = client
-        .post("/category/create")
-        .json(&CreateCategory {
-            id: &id,
-            token: &token,
-            data: CategoryData {
-                name: "test_category",
-                owner: UserRecordId {
-                    tb: "account".to_string(),
-                    id: id.clone(),
+    let mut new_category_id: Vec<String> = Vec::new();
+
+    for i in 0..10 {
+        let response = client
+            .post("/category/create")
+            .json(&CreateCategory {
+                id: &id,
+                token: &token,
+                data: CategoryData {
+                    name: &format!("test_category_{}", i),
+                    owner: UserRecordId {
+                        tb: "account".to_string(),
+                        id: id.clone(),
+                    },
                 },
+            })
+            .dispatch()
+            .await;
+
+        assert_eq!(response.status().code, 200);
+
+        let Response {
+            success,
+            message: _,
+            data,
+        } = response.into_json().await.unwrap();
+        let data: OwnedId = data.unwrap();
+
+        assert!(success);
+        println!("Created category: {}", data.id);
+        new_category_id.push(data.id);
+    }
+
+    let response = client
+        .post("/category/list")
+        .json(&ListCategories {
+            owner: UserRecordId {
+                tb: "account".to_string(),
+                id: id.clone(),
             },
         })
         .dispatch()
@@ -60,28 +88,30 @@ async fn test_category() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: OwnedId = data.unwrap();
+    let data: Vec<Category> = data.unwrap();
 
     assert!(success);
-    println!("Created category: {}", data.id);
+    println!("Listed categories: {:#?}", data);
 
-    let response = client
-        .post(format!("/category/delete/{}", data.id))
-        .json(&CreateCategory {
-            id: &id,
-            token: &token,
-            data: CategoryData {
-                name: "test_category",
-                owner: UserRecordId {
-                    tb: "account".to_string(),
-                    id: id.clone(),
+    for i in 0..10 {
+        let response = client
+            .post(format!("/category/delete/{}", new_category_id[i]))
+            .json(&CreateCategory {
+                id: &id,
+                token: &token,
+                data: CategoryData {
+                    name: "test_category",
+                    owner: UserRecordId {
+                        tb: "account".to_string(),
+                        id: id.clone(),
+                    },
                 },
-            },
-        })
-        .dispatch()
-        .await;
+            })
+            .dispatch()
+            .await;
 
-    response.into_json::<Response<Empty>>().await.unwrap();
+        response.into_json::<Response<Empty>>().await.unwrap();
+    }
 
     client
         .post(format!("/account/delete/{}", id))
