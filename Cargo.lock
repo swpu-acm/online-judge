@@ -78,7 +78,6 @@ dependencies = [
  "eval-stack",
  "rocket",
  "serde",
- "serde_json",
  "surrealdb",
  "uuid",
 ]

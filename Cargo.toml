@@ -15,6 +15,5 @@ chrono = { version = "0.4.38", features = ["serde"] }
 eval-stack = { version = "0.2.0", features = ["serde"] }
 rocket = { version = "0.5.1", features = ["json"] }
 serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.133"
 surrealdb = "2.1.0"
 uuid = { version = "1.11.0", features = ["v4"] }
