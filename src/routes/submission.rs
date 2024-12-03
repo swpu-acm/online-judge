@@ -16,7 +16,6 @@ pub struct CreateSubmission {
     pub auth: OwnedCredentials,
     pub code: String,
     pub lang: Language,
-    pub contest: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -41,7 +40,6 @@ pub async fn submit(
         id,
         data.code,
         data.lang,
-        data.contest.as_deref(),
     )
     .await?
     .ok_or(Error::ServerError(Json(
@@ -110,7 +108,7 @@ pub async fn list_by_problem(
     id: &str,
     _auth: Json<Credentials<'_>>,
 ) -> Result<Vec<Submission>> {
-    let submissions = submission::list_by_problem(db, id).await?;
+    let submissions = submission::list_by_problem(db, ("problem", id).into()).await?;
 
     Ok(Json(Response {
         success: true,

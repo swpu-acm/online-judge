@@ -9,7 +9,6 @@ pub async fn create(
     problem_id: &str,
     code: String,
     lang: Language,
-    contest: Option<&str>,
 ) -> Result<Option<Submission>> {
     Ok(db
         .create("submission")
@@ -23,7 +22,7 @@ pub async fn create(
             creator: ("account", account_id).into(),
             results: vec![],
 
-            contest: contest.map(|contest| ("contest", contest).into()),
+            contest: None,
 
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
@@ -63,10 +62,11 @@ pub async fn list_within_contest(
         .filter(|s| s.creator == user_id)
         .collect())
 }
-pub async fn list_by_problem(db: &Surreal<Client>, problem_id: &str) -> Result<Vec<Submission>> {
+
+pub async fn list_by_problem(db: &Surreal<Client>, problem: Thing) -> Result<Vec<Submission>> {
     Ok(db
-        .query("SELECT * FROM submission WHERE problem_id = $problem_id")
-        .bind(("problem_id", problem_id.to_string()))
+        .query("SELECT * FROM submission WHERE problem = &problem")
+        .bind(("problem", problem))
         .await?
         .take(0)?)
 }

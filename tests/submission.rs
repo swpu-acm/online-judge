@@ -144,7 +144,6 @@ async fn test_submission() -> Result<()> {
 
                 code: "test".to_string(),
                 lang: eval_stack::compile::Language::Rust,
-                contest: Some(contest_data.id.clone()),
             })
             .dispatch()
             .await;
