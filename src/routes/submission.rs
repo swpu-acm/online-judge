@@ -16,7 +16,7 @@ pub struct CreateSubmission {
     pub auth: OwnedCredentials,
     pub code: String,
     pub lang: Language,
-    pub contest_id: Option<String>,
+    pub contest: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -41,7 +41,7 @@ pub async fn submit(
         id,
         data.code,
         data.lang,
-        data.contest_id.as_deref(),
+        data.contest.as_deref(),
     )
     .await?
     .ok_or(Error::ServerError(Json(

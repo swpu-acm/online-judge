@@ -10,7 +10,7 @@ pub enum Status {
     Ready,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Submission {
     pub id: Option<Thing>,
 
