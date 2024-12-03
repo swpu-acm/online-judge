@@ -6,40 +6,13 @@ use crate::{
     models::{
         account::Account,
         error::Error,
-        problem::{Problem, ProblemDetail, Sample},
+        problem::{CreateProblem, Problem, ProblemVisibility, UserProblem},
         response::Response,
-        Credentials, OwnedCredentials, UserRecordId,
+        Credentials, OwnedCredentials, OwnedId,
     },
     utils::{account, problem, session},
     Result,
 };
-
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct CreateProblem<'r> {
-    pub id: &'r str,
-    pub token: &'r str,
-
-    pub title: &'r str,
-    pub description: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub input: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub output: Option<String>,
-    pub samples: Vec<Sample>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub hint: Option<String>,
-
-    pub owner: UserRecordId,
-    pub time_limit: u64,
-    pub memory_limit: u64,
-    pub test_cases: Vec<Sample>,
-
-    pub categories: Vec<String>,
-    pub tags: Vec<String>,
-
-    pub private: bool,
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
@@ -51,7 +24,7 @@ pub struct ProblemResponse {
 pub async fn create(
     db: &State<Surreal<Client>>,
     problem: Json<CreateProblem<'_>>,
-) -> Result<ProblemResponse> {
+) -> Result<OwnedId> {
     if !session::verify(db, problem.id, problem.token).await {
         return Err(Error::Unauthorized(Json("Invalid token".into())));
     }
@@ -66,7 +39,7 @@ pub async fn create(
     Ok(Json(Response {
         success: true,
         message: "Problem created successfully".to_string(),
-        data: Some(ProblemResponse {
+        data: Some(OwnedId {
             id: problem.id.unwrap().id.to_string(),
         }),
     }))
@@ -77,7 +50,7 @@ pub async fn get(
     db: &State<Surreal<Client>>,
     id: &str,
     auth: Json<Option<Credentials<'_>>>,
-) -> Result<ProblemDetail> {
+) -> Result<UserProblem> {
     let problem = problem::get::<Problem>(db, id)
         .await
         .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
@@ -85,18 +58,41 @@ pub async fn get(
             "Problem with specified id not found".into(),
         )))?;
 
-    let has_permission = if problem.private {
-        if let Some(auth) = auth.as_ref() {
-            if !session::verify(db, auth.id, auth.token).await {
-                return Err(Error::Unauthorized(Json("Invalid credentials".into())));
-            } else {
-                auth.id == problem.owner.id.to_string()
-            }
+    let authed_id = if let Some(auth) = auth.into_inner() {
+        if !session::verify(db, auth.id, auth.token).await {
+            return Err(Error::Unauthorized(Json("Invalid credentials".into())));
         } else {
-            false
+            Some(auth.id)
         }
     } else {
-        true
+        None
+    };
+
+    let has_permission = match problem.visibility {
+        ProblemVisibility::ContestOnly => {
+            if !authed_id.is_some() {
+                false
+            } else {
+                // Check for contest access
+                todo!()
+            }
+        }
+        ProblemVisibility::Public => true,
+        ProblemVisibility::Private => {
+            if !authed_id.is_some() {
+                false
+            } else {
+                problem.owner.id.to_string() == authed_id.unwrap()
+            }
+        }
+        ProblemVisibility::Internal => {
+            if !authed_id.is_some() {
+                false
+            } else {
+                // Check for internal access
+                todo!()
+            }
+        }
     };
 
     if !has_permission {
@@ -124,7 +120,7 @@ pub struct ListProblem {
 pub async fn list(
     db: &State<Surreal<Client>>,
     data: Json<ListProblem>,
-) -> Result<Vec<ProblemDetail>> {
+) -> Result<Vec<UserProblem>> {
     let authed_id = if let Some(auth) = &data.auth {
         if !session::verify(db, &auth.id, &auth.token).await {
             return Err(Error::Unauthorized(Json("Invalid token".into())));

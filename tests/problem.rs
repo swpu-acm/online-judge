@@ -1,11 +1,11 @@
 use algohub_server::{
     models::{
         account::Register,
-        problem::ProblemDetail,
+        problem::{CreateProblem, ProblemVisibility, UserProblem},
         response::{Empty, Response},
         OwnedCredentials, Token, UserRecordId,
     },
-    routes::problem::{CreateProblem, ListProblem, ProblemResponse},
+    routes::problem::{ListProblem, ProblemResponse},
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
@@ -62,7 +62,7 @@ async fn test_problem() -> Result<()> {
                 test_cases: vec![],
                 categories: vec![],
                 tags: vec![],
-                private: true,
+                visibility: ProblemVisibility::Public,
             })
             .dispatch()
             .await;
@@ -98,7 +98,7 @@ async fn test_problem() -> Result<()> {
         message: _,
         data,
     } = response
-        .into_json::<Response<Vec<ProblemDetail>>>()
+        .into_json::<Response<Vec<UserProblem>>>()
         .await
         .unwrap();
     let data = data.unwrap();
@@ -123,7 +123,7 @@ async fn test_problem() -> Result<()> {
         message: _,
         data,
     } = response
-        .into_json::<Response<Vec<ProblemDetail>>>()
+        .into_json::<Response<Vec<UserProblem>>>()
         .await
         .unwrap();
     let data = data.unwrap();

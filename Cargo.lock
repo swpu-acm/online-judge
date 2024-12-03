@@ -71,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "algohub-server"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1000,9 +1000,9 @@ dependencies = [
 
 [[package]]
 name = "eval-stack"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6051d0c8dba3eefbe04a05cf9e81e75402511f2db70e7afc6e14bc9d1fe2665d"
+checksum = "6da0079f339d7a393172c036cd9d9b3b2e3df2e9e8fdde7ad35a82b128601f74"
 dependencies = [
  "anyhow",
  "libc",
