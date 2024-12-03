@@ -34,17 +34,11 @@ pub async fn submit(
     }
 
     let data = data.into_inner();
-    let submission = submission::create(
-        db,
-        &data.auth.id,
-        id,
-        data.code,
-        data.lang,
-    )
-    .await?
-    .ok_or(Error::ServerError(Json(
-        "Failed to submit, please try again later.".into(),
-    )))?;
+    let submission = submission::create(db, &data.auth.id, id, data.code, data.lang)
+        .await?
+        .ok_or(Error::ServerError(Json(
+            "Failed to submit, please try again later.".into(),
+        )))?;
 
     Ok(Json(Response {
         success: true,
