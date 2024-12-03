@@ -9,7 +9,7 @@ pub async fn create(
     problem_id: &str,
     code: String,
     lang: Language,
-    contest_id: Option<&str>,
+    contest: Option<&str>,
 ) -> Result<Option<Submission>> {
     Ok(db
         .create("submission")
@@ -23,8 +23,8 @@ pub async fn create(
             creator: ("account", account_id).into(),
             results: vec![],
 
-            contest_id: (if let Some(contest_id) = contest_id {
-                Some(("contest", contest_id).into())
+            contest: (if let Some(contest) = contest {
+                Some(("contest", contest).into())
             } else {
                 None
             }),

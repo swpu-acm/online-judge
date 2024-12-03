@@ -74,7 +74,7 @@ pub async fn get(
     }))
 }
 
-#[post("/list/<id>", data = "<_auth>")]
+#[post("/list/user/<id>", data = "<_auth>")]
 pub async fn list_by_user(
     db: &State<Surreal<Client>>,
     id: &str,
@@ -91,7 +91,7 @@ pub async fn list_by_user(
     }))
 }
 
-#[post("/list/<id>", data = "<_auth>")]
+#[post("/list/contest/<id>", data = "<_auth>")]
 pub async fn list_by_contest(
     db: &State<Surreal<Client>>,
     id: &str,
@@ -108,7 +108,7 @@ pub async fn list_by_contest(
     }))
 }
 
-#[post("/list/<contest_id>/<user_id>", data = "<_auth>")]
+#[post("/list/contest/<contest_id>/<user_id>", data = "<_auth>")]
 pub async fn list_within_contest(
     db: &State<Surreal<Client>>,
     contest_id: &str,
