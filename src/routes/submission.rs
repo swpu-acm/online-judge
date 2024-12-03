@@ -16,6 +16,7 @@ pub struct CreateSubmission {
     pub auth: OwnedCredentials,
     pub code: String,
     pub lang: Language,
+    pub contest_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,12 +35,18 @@ pub async fn submit(
     }
 
     let data = data.into_inner();
-    let submission = submission::create(db, &data.auth.id, id, data.code, data.lang)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
-        .ok_or(Error::ServerError(Json(
-            "Failed to submit, please try again later.".into(),
-        )))?;
+    let submission = submission::create(
+        db,
+        &data.auth.id,
+        id,
+        data.code,
+        data.lang,
+        data.contest_id.as_deref(),
+    )
+    .await?
+    .ok_or(Error::ServerError(Json(
+        "Failed to submit, please try again later.".into(),
+    )))?;
 
     Ok(Json(Response {
         success: true,
@@ -57,8 +64,7 @@ pub async fn get(
     _auth: Json<Credentials<'_>>,
 ) -> Result<Submission> {
     let submission = submission::get_by_id(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::NotFound(Json("Submission not found".into())))?;
 
     Ok(Json(Response {
@@ -68,7 +74,69 @@ pub async fn get(
     }))
 }
 
+#[post("/list/<id>", data = "<_auth>")]
+pub async fn list_by_user(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    _auth: Json<Credentials<'_>>,
+) -> Result<Vec<Submission>> {
+    let submissions = submission::list_by_user(db, ("account", id).into())
+        .await?
+        .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "submission fetched successfully".to_string(),
+        data: Some(submissions),
+    }))
+}
+
+#[post("/list/<id>", data = "<_auth>")]
+pub async fn list_by_contest(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    _auth: Json<Credentials<'_>>,
+) -> Result<Vec<Submission>> {
+    let submissions = submission::list_by_contest(db, ("contest", id).into())
+        .await?
+        .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "submission fetched successfully".to_string(),
+        data: Some(submissions),
+    }))
+}
+
+#[post("/list/<contest_id>/<user_id>", data = "<_auth>")]
+pub async fn list_within_contest(
+    db: &State<Surreal<Client>>,
+    contest_id: &str,
+    user_id: &str,
+    _auth: Json<Credentials<'_>>,
+) -> Result<Vec<Submission>> {
+    let submissions = submission::list_within_contest(
+        db,
+        ("contest", contest_id).into(),
+        ("contest", user_id).into(),
+    )
+    .await?
+    .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "submission fetched successfully".to_string(),
+        data: Some(submissions),
+    }))
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![submit, get]
+    routes![
+        submit,
+        get,
+        list_by_user,
+        list_by_contest,
+        list_within_contest
+    ]
 }

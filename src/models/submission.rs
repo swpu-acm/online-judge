@@ -20,6 +20,7 @@ pub struct Submission {
     pub status: Status,
     pub results: Vec<JudgeResult>,
     pub creator: Thing,
+    pub contest_id: Option<Thing>,
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,

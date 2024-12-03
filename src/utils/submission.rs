@@ -1,7 +1,7 @@
 use crate::models::submission::Submission;
 use anyhow::Result;
 use eval_stack::compile::Language;
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 pub async fn create(
     db: &Surreal<Client>,
@@ -9,6 +9,7 @@ pub async fn create(
     problem_id: &str,
     code: String,
     lang: Language,
+    contest_id: Option<&str>,
 ) -> Result<Option<Submission>> {
     Ok(db
         .create("submission")
@@ -22,6 +23,12 @@ pub async fn create(
             creator: ("account", account_id).into(),
             results: vec![],
 
+            contest_id: (if let Some(contest_id) = contest_id {
+                Some(("contest", contest_id).into())
+            } else {
+                None
+            }),
+
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
         })
@@ -30,4 +37,41 @@ pub async fn create(
 
 pub async fn get_by_id(db: &Surreal<Client>, id: &str) -> Result<Option<Submission>> {
     Ok(db.select(("submission", id)).await?)
+}
+
+pub async fn list_by_user(db: &Surreal<Client>, creator: Thing) -> Result<Option<Vec<Submission>>> {
+    Ok(db
+        .query("SELECT * FROM submission WHERE creator = $creator")
+        .bind(("creator", creator))
+        .await?
+        .take(0)?)
+}
+
+pub async fn list_by_contest(
+    db: &Surreal<Client>,
+    contest_id: Thing,
+) -> Result<Option<Vec<Submission>>> {
+    Ok(db
+        .query("SELECT * FROM submission WHERE contest_id = $contest_id")
+        .bind(("contest_id", contest_id))
+        .await?
+        .take(0)?)
+}
+
+pub async fn list_within_contest(
+    db: &Surreal<Client>,
+    contest_id: Thing,
+    user_id: Thing,
+) -> Result<Option<Vec<Submission>>> {
+    let submissions = list_by_contest(db, contest_id).await?;
+
+    match submissions {
+        Some(submissions) => Ok(Some(
+            submissions
+                .into_iter()
+                .filter(|s| s.creator == user_id)
+                .collect(),
+        )),
+        None => Ok(None),
+    }
 }
