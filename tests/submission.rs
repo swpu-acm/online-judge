@@ -7,14 +7,19 @@ use algohub_server::{
         submission::Submission,
         Credentials, OwnedCredentials, OwnedId, Token, UserRecordId,
     },
-    routes::{problem::ProblemResponse, submission::CreateSubmission},
+    routes::{index::init_db, problem::ProblemResponse, submission::CreateSubmission},
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
+pub mod utils;
 
 #[rocket::async_test]
 async fn test_submission() -> Result<()> {
-    let rocket = algohub_server::rocket().await;
+    let db = init_db(utils::TEST_DB_ADDR)
+        .await
+        .expect("Failed to initialize database, shutting down");
+    let rocket = algohub_server::rocket(db.clone()).await;
+
     let client = Client::tracked(rocket).await?;
 
     println!("Testing submission...");
