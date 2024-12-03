@@ -15,7 +15,7 @@ pub struct Submission {
     pub id: Option<Thing>,
 
     pub lang: Language,
-    pub problem_id: String,
+    pub problem: Thing,
     pub code: String,
     pub status: Status,
     pub results: Vec<JudgeResult>,

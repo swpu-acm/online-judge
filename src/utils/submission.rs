@@ -6,7 +6,7 @@ use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 pub async fn create(
     db: &Surreal<Client>,
     account_id: &str,
-    problem_id: &str,
+    problem: &str,
     code: String,
     lang: Language,
 ) -> Result<Option<Submission>> {
@@ -16,7 +16,7 @@ pub async fn create(
             id: None,
             lang,
             code,
-            problem_id: problem_id.to_string(),
+            problem: ("problem", problem).into(),
             status: crate::models::submission::Status::InQueue,
 
             creator: ("account", account_id).into(),
@@ -65,7 +65,7 @@ pub async fn list_within_contest(
 
 pub async fn list_by_problem(db: &Surreal<Client>, problem: Thing) -> Result<Vec<Submission>> {
     Ok(db
-        .query("SELECT * FROM submission WHERE problem = &problem")
+        .query("SELECT * FROM submission WHERE problem = $problem")
         .bind(("problem", problem))
         .await?
         .take(0)?)
