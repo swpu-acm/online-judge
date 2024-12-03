@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.1.10]
+
+### New Features
+
+- [`6abc5bc`](https://github.com/swpu-acm/online-judge/commit/6abc5bc1679b94364cc4da71f05390eb83667570) ([#43](https://github.com/swpu-acm/online-judge/pull/43) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Add endpoint to delete a problem by specified problem ID.
+- [`1bee9b5`](https://github.com/swpu-acm/online-judge/commit/1bee9b59233505349c4175df359c23c1a6334c6f) ([#44](https://github.com/swpu-acm/online-judge/pull/44) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) Support list submissions by user or contest or user and contest
+
 ## \[0.1.9]
 
 ### New Features
