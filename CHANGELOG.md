@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.9]
+
+### New Features
+
+- [`2af9a74`](https://github.com/swpu-acm/online-judge/commit/2af9a745bd51c7a831aa3fd98b0ba6cf08b49e03) ([#40](https://github.com/swpu-acm/online-judge/pull/40) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Refactor problem strucutre to support multiple test cases and safely handle input/output files.
+
 ## \[0.1.8]
 
 ### New Features
