@@ -163,3 +163,9 @@ impl From<Problem> for UserProblem {
         }
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ServerTestCase {
+    pub input: String,
+    pub output: String,
+}

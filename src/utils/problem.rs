@@ -1,8 +1,8 @@
 use anyhow::Result;
 use serde::Deserialize;
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::problem::{CreateProblem, Problem};
+use crate::models::problem::{CreateProblem, Problem, ServerTestCase};
 
 pub async fn create(db: &Surreal<Client>, problem: CreateProblem<'_>) -> Result<Option<Problem>> {
     Ok(db
@@ -21,8 +21,20 @@ pub async fn update(db: &Surreal<Client>, problem: Problem) -> Result<Option<Pro
         .await?)
 }
 
+const DELETE_ALL_ASSETS_QUERY: &str = r#"
+IF $problem.exists() {
+    FOR $asset IN (SELECT VALUE test_cases FROM $problem) {
+        DELETE $asset.input, $asset.output;
+    };
+    (DELETE ONLY $problem RETURN BEFORE)
+}
+"#;
 pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<Option<Problem>> {
-    Ok(db.delete(("problem", id)).await?)
+    Ok(db
+        .query(DELETE_ALL_ASSETS_QUERY)
+        .bind(("problem", Thing::from(("problem", id))))
+        .await?
+        .take(0)?)
 }
 
 pub async fn get<M>(db: &Surreal<Client>, id: &str) -> Result<Option<M>>
@@ -67,4 +79,19 @@ where
         .await?;
 
     Ok(response.take(0)?)
+}
+
+const SELECT_TEST_CASES_QUERY: &str = r#"
+IF $problem.exists() THEN
+    SELECT input.path AS input, output.path AS output FROM $problem.test_cases
+ELSE
+    []
+END;
+"#;
+pub async fn get_test_cases_by_id(db: &Surreal<Client>, id: &str) -> Result<Vec<ServerTestCase>> {
+    Ok(db
+        .query(SELECT_TEST_CASES_QUERY)
+        .bind(("problem", Thing::from(("problem", id))))
+        .await?
+        .take(0)?)
 }
