@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::routes::problem::CreateProblem;
-
 use super::UserRecordId;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -11,7 +9,31 @@ pub struct Sample {
     pub output: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct TestCase {
+    pub input: Thing,
+    pub output: Thing,
+}
+
+impl From<UserTestCase<'_>> for TestCase {
+    fn from(value: UserTestCase<'_>) -> Self {
+        TestCase {
+            input: Thing::from(("asset", value.input)),
+            output: Thing::from(("asset", value.output)),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum ProblemVisibility {
+    ContestOnly,
+    Public,
+    Private,
+    Internal,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Problem {
     pub id: Option<Thing>,
 
@@ -24,17 +46,50 @@ pub struct Problem {
 
     pub time_limit: u64,
     pub memory_limit: u64,
-    pub test_cases: Vec<Sample>,
+    pub test_cases: Vec<TestCase>,
 
     pub creator: Thing,
     pub owner: Thing,
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
-    pub private: bool,
+    pub visibility: ProblemVisibility,
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserTestCase<'r> {
+    pub input: &'r str,
+    pub output: &'r str,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CreateProblem<'r> {
+    pub id: &'r str,
+    pub token: &'r str,
+
+    pub title: &'r str,
+    pub description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub input: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub output: Option<String>,
+    pub samples: Vec<Sample>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hint: Option<String>,
+
+    pub owner: UserRecordId,
+    pub time_limit: u64,
+    pub memory_limit: u64,
+    pub test_cases: Vec<UserTestCase<'r>>,
+
+    pub categories: Vec<String>,
+    pub tags: Vec<String>,
+
+    pub visibility: ProblemVisibility,
 }
 
 impl From<CreateProblem<'_>> for Problem {
@@ -49,12 +104,12 @@ impl From<CreateProblem<'_>> for Problem {
             hint: val.hint,
             time_limit: val.time_limit,
             memory_limit: val.memory_limit,
-            test_cases: val.test_cases,
+            test_cases: val.test_cases.into_iter().map(Into::into).collect(),
             creator: ("account", val.id).into(),
             owner: val.owner.into(),
             categories: val.categories,
             tags: val.tags,
-            private: val.private,
+            visibility: val.visibility,
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
         }
@@ -62,7 +117,7 @@ impl From<CreateProblem<'_>> for Problem {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ProblemDetail {
+pub struct UserProblem {
     pub id: String,
 
     pub title: String,
@@ -74,22 +129,21 @@ pub struct ProblemDetail {
 
     pub time_limit: u64,
     pub memory_limit: u64,
-    pub test_cases: Vec<Sample>,
 
-    pub creator: UserRecordId,
+    pub creator: String,
     pub owner: UserRecordId,
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
-    pub private: bool,
+    pub visibility: ProblemVisibility,
 
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
 
-impl From<Problem> for ProblemDetail {
+impl From<Problem> for UserProblem {
     fn from(value: Problem) -> Self {
-        ProblemDetail {
+        UserProblem {
             id: value.id.unwrap().id.to_string(),
             title: value.title,
             description: value.description,
@@ -99,12 +153,11 @@ impl From<Problem> for ProblemDetail {
             hint: value.hint,
             time_limit: value.time_limit,
             memory_limit: value.memory_limit,
-            test_cases: value.test_cases,
-            creator: value.creator.into(),
+            creator: value.creator.id.to_string(),
             owner: value.owner.into(),
             categories: value.categories,
             tags: value.tags,
-            private: value.private,
+            visibility: value.visibility,
             created_at: value.created_at,
             updated_at: value.updated_at,
         }
