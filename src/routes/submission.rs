@@ -127,7 +127,7 @@ pub async fn list_within_contest(
     let submissions = submission::list_within_contest(
         db,
         ("contest", contest_id).into(),
-        ("contest", user_id).into(),
+        ("account", user_id).into(),
     )
     .await?;
 

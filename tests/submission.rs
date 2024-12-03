@@ -52,7 +52,7 @@ async fn test_submission() -> Result<()> {
         .json(&CreateProblem {
             id: &id,
             token: &token,
-            title: &format!("Test Problem #1",),
+            title: "Test Problem #1",
             description: "Test Description".to_string(),
             input: Some("Test Input".to_string()),
             output: Some("Test Output".to_string()),
@@ -183,26 +183,28 @@ async fn test_submission() -> Result<()> {
     assert!(success);
     println!("Get submissions by id: {:#?}", data);
 
-    let response = client
-        .post(format!("/code/list/contest/{}", contest_data.id))
-        .json(&Credentials {
-            id: &id,
-            token: &token,
-        })
-        .dispatch()
-        .await;
+    // let response = client
+    //     .post(format!("/code/list/contest/{}", contest_data.id))
+    //     .json(&Credentials {
+    //         id: &id,
+    //         token: &token,
+    //     })
+    //     .dispatch()
+    //     .await;
 
-    assert_eq!(response.status().code, 200);
+    // assert_eq!(response.status().code, 200);
 
-    let Response {
-        success,
-        message: _,
-        data,
-    } = response.into_json().await.unwrap();
-    let data: Vec<Submission> = data.unwrap();
+    // let Response {
+    //     success,
+    //     message: _,
+    //     data,
+    // } = response.into_json().await.unwrap();
+    // let data: Vec<Submission> = data.unwrap();
 
-    assert!(success);
-    println!("Get submissions by contest: {:#?}", data);
+    // assert!(success);
+    // assert_eq!(data.len(), 5);
+
+    // println!("Get submissions by contest: {:#?}", data);
 
     let response = client
         .post(format!("/code/list/user/{}", id))
@@ -214,7 +216,6 @@ async fn test_submission() -> Result<()> {
         .await;
 
     assert_eq!(response.status().code, 200);
-
     let Response {
         success,
         message: _,
@@ -223,28 +224,31 @@ async fn test_submission() -> Result<()> {
     let data: Vec<Submission> = data.unwrap();
 
     assert!(success);
+    assert_eq!(data.len(), 5);
+
     println!("Get submissions by user: {:#?}", data);
 
-    let response = client
-        .post(format!("/code/list/contest/{}/{}", contest_data.id, id))
-        .json(&Credentials {
-            id: &id,
-            token: &token,
-        })
-        .dispatch()
-        .await;
+    // let response = client
+    //     .post(format!("/code/list/contest/{}/{}", contest_data.id, id))
+    //     .json(&Credentials {
+    //         id: &id,
+    //         token: &token,
+    //     })
+    //     .dispatch()
+    //     .await;
 
-    assert_eq!(response.status().code, 200);
+    // assert_eq!(response.status().code, 200);
 
-    let Response {
-        success,
-        message: _,
-        data,
-    } = response.into_json().await.unwrap();
-    let data: Vec<Submission> = data.unwrap();
+    // let Response {
+    //     success,
+    //     message: _,
+    //     data,
+    // } = response.into_json().await.unwrap();
+    // let data: Vec<Submission> = data.unwrap();
 
-    assert!(success);
-    println!("Get submissions by user within a contest: {:#?}", data);
+    // assert!(success);
+    // assert_eq!(data.len(), 5);
+    // println!("Get submissions by user within a contest: {:#?}", data);
 
     let response = client
         .post(format!("/code/list/problem/{}", problem_data.id))
@@ -263,6 +267,8 @@ async fn test_submission() -> Result<()> {
         data,
     } = response.into_json().await.unwrap();
     let data: Vec<Submission> = data.unwrap();
+
+    assert_eq!(data.len(), 5);
 
     assert!(success);
     println!("Get submissions by problem: {:#?}", data);

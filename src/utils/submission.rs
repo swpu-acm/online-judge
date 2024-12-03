@@ -1,3 +1,4 @@
+use crate::models::submission::Status;
 use crate::models::submission::Submission;
 use anyhow::Result;
 use eval_stack::compile::Language;
@@ -17,7 +18,7 @@ pub async fn create(
             lang,
             code,
             problem: ("problem", problem).into(),
-            status: crate::models::submission::Status::InQueue,
+            status: Status::InQueue,
 
             creator: ("account", account_id).into(),
             results: vec![],
@@ -42,25 +43,25 @@ pub async fn list_by_user(db: &Surreal<Client>, creator: Thing) -> Result<Vec<Su
         .take(0)?)
 }
 
-pub async fn list_by_contest(db: &Surreal<Client>, contest_id: Thing) -> Result<Vec<Submission>> {
+pub async fn list_by_contest(db: &Surreal<Client>, contest: Thing) -> Result<Vec<Submission>> {
     Ok(db
-        .query("SELECT * FROM submission WHERE contest_id = $contest_id")
-        .bind(("contest_id", contest_id))
+        .query("SELECT * FROM submission WHERE contest = $contest")
+        .bind(("contest", contest))
         .await?
         .take(0)?)
 }
 
 pub async fn list_within_contest(
     db: &Surreal<Client>,
-    contest_id: Thing,
-    user_id: Thing,
+    contest: Thing,
+    creator: Thing,
 ) -> Result<Vec<Submission>> {
-    let submissions = list_by_contest(db, contest_id).await?;
-
-    Ok(submissions
-        .into_iter()
-        .filter(|s| s.creator == user_id)
-        .collect())
+    Ok(db
+        .query("SELECT * FROM submission WHERE contest = $contest AND creator = $creator")
+        .bind(("contest", contest))
+        .bind(("creator", creator))
+        .await?
+        .take(0)?)
 }
 
 pub async fn list_by_problem(db: &Surreal<Client>, problem: Thing) -> Result<Vec<Submission>> {
