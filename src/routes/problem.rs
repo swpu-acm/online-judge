@@ -1,4 +1,4 @@
-use rocket::{serde::json::Json, State};
+use rocket::{serde::json::Json, tokio::fs::remove_file, State};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
@@ -7,7 +7,7 @@ use crate::{
         account::Account,
         error::Error,
         problem::{CreateProblem, Problem, ProblemVisibility, UserProblem},
-        response::Response,
+        response::{Empty, Response},
         Credentials, OwnedCredentials, OwnedId,
     },
     utils::{account, problem, session},
@@ -148,7 +148,34 @@ pub async fn list(
     }))
 }
 
+#[delete("/delete/<id>", data = "<auth>")]
+pub async fn delete(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    auth: Json<Credentials<'_>>,
+) -> Result<Empty> {
+    if !session::verify(db, auth.id, auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+
+    for test_case in problem::get_test_cases_by_id(db, id).await? {
+        remove_file(test_case.input).await?;
+        remove_file(test_case.output).await?;
+    }
+    println!("Down");
+
+    problem::delete(db, id).await?.ok_or(Error::NotFound(Json(
+        "Problem with specified id not found".into(),
+    )))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "Problem deleted successfully".to_string(),
+        data: None,
+    }))
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, get, list]
+    routes![create, get, list, delete]
 }

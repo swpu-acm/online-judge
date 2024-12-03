@@ -8,7 +8,7 @@ pub struct CORS;
 impl Fairing for CORS {
     fn info(&self) -> Info {
         Info {
-            name: "Add CORS headers to responses",
+            name: "CORS Policy",
             kind: Kind::Response,
         }
     }

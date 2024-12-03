@@ -9,6 +9,7 @@ use super::submission;
 use crate::{cors::CORS, routes::account};
 use anyhow::Result;
 use rocket::fs::NamedFile;
+use surrealdb::engine::remote::ws::Client;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
 
 #[get("/")]
@@ -21,10 +22,11 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("dist/").join(file)).await.ok()
 }
 
-pub async fn rocket() -> rocket::Rocket<rocket::Build> {
-    let db = Surreal::new::<Ws>("127.0.0.1:5176")
+pub async fn init_db(db_addr: &str) -> Result<Surreal<Client>> {
+    let db = Surreal::new::<Ws>(db_addr)
         .await
         .expect("Failed to connect to database");
+
     db.use_ns("main")
         .use_db("acm")
         .await
@@ -36,6 +38,10 @@ pub async fn rocket() -> rocket::Rocket<rocket::Build> {
     .await
     .expect("Failed to authenticate");
 
+    Ok(db)
+}
+
+pub async fn rocket(db: Surreal<Client>) -> rocket::Rocket<rocket::Build> {
     rocket::build()
         .attach(CORS)
         .mount("/", routes![index, files])

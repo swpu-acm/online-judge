@@ -1,3 +1,5 @@
+mod utils;
+
 use std::path::Path;
 
 use algohub_server::models::{
@@ -8,10 +10,11 @@ use algohub_server::models::{
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
+use utils::rocket;
 
 #[rocket::async_test]
 async fn test_organization() -> Result<()> {
-    let rocket = algohub_server::rocket().await;
+    let rocket = rocket().await;
 
     let client = Client::tracked(rocket).await?;
 

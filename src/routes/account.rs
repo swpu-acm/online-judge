@@ -133,7 +133,21 @@ pub async fn login(
     .into())
 }
 
+#[post("/verify", data = "<data>")]
+pub async fn verify(db: &State<Surreal<Client>>, data: Json<OwnedCredentials>) -> Result<Empty> {
+    if session::verify(db, &data.id, &data.token).await {
+        Ok(Response {
+            success: true,
+            message: "Verified successfully".into(),
+            data: None,
+        }
+        .into())
+    } else {
+        Err(Error::Unauthorized(Json("Invalid credentials".into())))
+    }
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![register, profile, get_profile, delete, login]
+    routes![register, profile, get_profile, delete, login, verify]
 }
