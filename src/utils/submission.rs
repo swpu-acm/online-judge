@@ -23,11 +23,7 @@ pub async fn create(
             creator: ("account", account_id).into(),
             results: vec![],
 
-            contest: (if let Some(contest) = contest {
-                Some(("contest", contest).into())
-            } else {
-                None
-            }),
+            contest: contest.map(|contest| ("contest", contest).into()),
 
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
