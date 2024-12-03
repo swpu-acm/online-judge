@@ -57,7 +57,7 @@ impl AsRef<[u8]> for Upload<'_> {
     }
 }
 
-pub const TEST_DB_ADDR: &str = "localhost:27017";
+pub const TEST_DB_ADDR: &str = "localhost:5176";
 
 pub async fn rocket() -> rocket::Rocket<rocket::Build> {
     algohub_server::rocket(
