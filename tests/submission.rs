@@ -13,7 +13,7 @@ use anyhow::Result;
 use rocket::local::asynchronous::Client;
 
 #[rocket::async_test]
-async fn test_category() -> Result<()> {
+async fn test_submission() -> Result<()> {
     let rocket = algohub_server::rocket().await;
     let client = Client::tracked(rocket).await?;
 
@@ -37,8 +37,8 @@ async fn test_category() -> Result<()> {
     } = response.into_json().await.unwrap();
     let data: OwnedCredentials = data.unwrap();
 
-    let id = data.id.clone();
-    let token = data.token.clone();
+    let id = data.id;
+    let token = data.token;
 
     assert!(success);
 
@@ -112,7 +112,7 @@ async fn test_category() -> Result<()> {
     let contest_data: OwnedId = data.unwrap();
 
     let response = client
-        .post("/problems/add")
+        .post("/contest/problems/add")
         .json(&AddProblems {
             auth: OwnedCredentials {
                 id: id.clone(),
@@ -130,7 +130,7 @@ async fn test_category() -> Result<()> {
 
     for _ in 0..5 {
         let response = client
-            .post(format!("/submission/submit/{}", problem_data.id))
+            .post(format!("/code/submit/{}", problem_data.id))
             .json(&CreateSubmission {
                 auth: OwnedCredentials {
                     id: id.to_string(),
@@ -159,7 +159,7 @@ async fn test_category() -> Result<()> {
     }
 
     let response = client
-        .post(format!("/submission/get/{}", problem_data.id))
+        .post(format!("/code/get/{}", new_submission[0]))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -174,13 +174,13 @@ async fn test_category() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: Vec<Submission> = data.unwrap();
+    let data: Submission = data.unwrap();
 
     assert!(success);
     println!("Get submissions by id: {:#?}", data);
 
     let response = client
-        .post(format!("/submission/list/contest/{}", contest_data.id))
+        .post(format!("/code/list/contest/{}", contest_data.id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -201,7 +201,7 @@ async fn test_category() -> Result<()> {
     println!("Get submissions by contest: {:#?}", data);
 
     let response = client
-        .post(format!("/submission/list/user/{}", id))
+        .post(format!("/code/list/user/{}", id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -222,10 +222,7 @@ async fn test_category() -> Result<()> {
     println!("Get submissions by user: {:#?}", data);
 
     let response = client
-        .post(format!(
-            "/submission/list/contest/{}/{}",
-            contest_data.id, id
-        ))
+        .post(format!("/code/list/contest/{}/{}", contest_data.id, id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -244,6 +241,27 @@ async fn test_category() -> Result<()> {
 
     assert!(success);
     println!("Get submissions by user within a contest: {:#?}", data);
+
+    let response = client
+        .post(format!("/code/list/problem/{}", problem_data.id))
+        .json(&Credentials {
+            id: &id,
+            token: &token,
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    let Response {
+        success,
+        message: _,
+        data,
+    } = response.into_json().await.unwrap();
+    let data: Vec<Submission> = data.unwrap();
+
+    assert!(success);
+    println!("Get submissions by problem: {:#?}", data);
 
     client
         .post(format!("/account/delete/{}", id))

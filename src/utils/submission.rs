@@ -35,7 +35,7 @@ pub async fn get_by_id(db: &Surreal<Client>, id: &str) -> Result<Option<Submissi
     Ok(db.select(("submission", id)).await?)
 }
 
-pub async fn list_by_user(db: &Surreal<Client>, creator: Thing) -> Result<Option<Vec<Submission>>> {
+pub async fn list_by_user(db: &Surreal<Client>, creator: Thing) -> Result<Vec<Submission>> {
     Ok(db
         .query("SELECT * FROM submission WHERE creator = $creator")
         .bind(("creator", creator))
@@ -43,10 +43,7 @@ pub async fn list_by_user(db: &Surreal<Client>, creator: Thing) -> Result<Option
         .take(0)?)
 }
 
-pub async fn list_by_contest(
-    db: &Surreal<Client>,
-    contest_id: Thing,
-) -> Result<Option<Vec<Submission>>> {
+pub async fn list_by_contest(db: &Surreal<Client>, contest_id: Thing) -> Result<Vec<Submission>> {
     Ok(db
         .query("SELECT * FROM submission WHERE contest_id = $contest_id")
         .bind(("contest_id", contest_id))
@@ -58,16 +55,18 @@ pub async fn list_within_contest(
     db: &Surreal<Client>,
     contest_id: Thing,
     user_id: Thing,
-) -> Result<Option<Vec<Submission>>> {
+) -> Result<Vec<Submission>> {
     let submissions = list_by_contest(db, contest_id).await?;
 
-    match submissions {
-        Some(submissions) => Ok(Some(
-            submissions
-                .into_iter()
-                .filter(|s| s.creator == user_id)
-                .collect(),
-        )),
-        None => Ok(None),
-    }
+    Ok(submissions
+        .into_iter()
+        .filter(|s| s.creator == user_id)
+        .collect())
+}
+pub async fn list_by_problem(db: &Surreal<Client>, problem_id: &str) -> Result<Vec<Submission>> {
+    Ok(db
+        .query("SELECT * FROM submission WHERE problem_id = $problem_id")
+        .bind(("problem_id", problem_id.to_string()))
+        .await?
+        .take(0)?)
 }

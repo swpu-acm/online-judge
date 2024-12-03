@@ -80,9 +80,7 @@ pub async fn list_by_user(
     id: &str,
     _auth: Json<Credentials<'_>>,
 ) -> Result<Vec<Submission>> {
-    let submissions = submission::list_by_user(db, ("account", id).into())
-        .await?
-        .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+    let submissions = submission::list_by_user(db, ("account", id).into()).await?;
 
     Ok(Json(Response {
         success: true,
@@ -97,9 +95,22 @@ pub async fn list_by_contest(
     id: &str,
     _auth: Json<Credentials<'_>>,
 ) -> Result<Vec<Submission>> {
-    let submissions = submission::list_by_contest(db, ("contest", id).into())
-        .await?
-        .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+    let submissions = submission::list_by_contest(db, ("contest", id).into()).await?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "submission fetched successfully".to_string(),
+        data: Some(submissions),
+    }))
+}
+
+#[post("/list/problem/<id>", data = "<_auth>")]
+pub async fn list_by_problem(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    _auth: Json<Credentials<'_>>,
+) -> Result<Vec<Submission>> {
+    let submissions = submission::list_by_problem(db, id).await?;
 
     Ok(Json(Response {
         success: true,
@@ -120,8 +131,7 @@ pub async fn list_within_contest(
         ("contest", contest_id).into(),
         ("contest", user_id).into(),
     )
-    .await?
-    .ok_or(Error::NotFound(Json("Submission not found".into())))?;
+    .await?;
 
     Ok(Json(Response {
         success: true,
@@ -137,6 +147,7 @@ pub fn routes() -> Vec<rocket::Route> {
         get,
         list_by_user,
         list_by_contest,
-        list_within_contest
+        list_within_contest,
+        list_by_problem,
     ]
 }
