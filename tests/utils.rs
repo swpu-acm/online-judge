@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use algohub_server::models::Credentials;
+use algohub_server::{models::Credentials, routes::index::init_db};
 
 pub struct Upload<'a> {
     pub auth: Credentials<'a>,
@@ -55,4 +55,15 @@ impl AsRef<[u8]> for Upload<'_> {
 
         body.leak()
     }
+}
+
+pub const TEST_DB_ADDR: &str = "localhost:27017";
+
+pub async fn rocket() -> rocket::Rocket<rocket::Build> {
+    algohub_server::rocket(
+        init_db(TEST_DB_ADDR)
+            .await
+            .expect("Failed to initialize database, shutting down"),
+    )
+    .await
 }

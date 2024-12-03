@@ -10,11 +10,11 @@ use algohub_server::models::{
 };
 use anyhow::Result;
 use rocket::{http::ContentType, local::asynchronous::Client};
-use utils::Upload;
+use utils::{rocket, Upload};
 
 #[rocket::async_test]
 async fn test_register() -> Result<()> {
-    let rocket = algohub_server::rocket().await;
+    let rocket = rocket().await;
 
     let client = Client::tracked(rocket).await?;
 

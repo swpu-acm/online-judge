@@ -1,3 +1,5 @@
+mod utils;
+
 use algohub_server::models::{
     account::Register,
     category::{Category, CategoryData, CreateCategory, ListCategories},
@@ -6,10 +8,11 @@ use algohub_server::models::{
 };
 use anyhow::Result;
 use rocket::local::asynchronous::Client;
+use utils::rocket;
 
 #[rocket::async_test]
 async fn test_category() -> Result<()> {
-    let rocket = algohub_server::rocket().await;
+    let rocket = rocket().await;
     let client = Client::tracked(rocket).await?;
 
     println!("Testing category...");
