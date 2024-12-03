@@ -68,27 +68,17 @@ pub async fn get(
         None
     };
 
-    let has_permission = match problem.visibility {
-        ProblemVisibility::ContestOnly => {
-            if !authed_id.is_some() {
-                false
-            } else {
+    let has_permission = if authed_id.is_none() && problem.visibility != ProblemVisibility::Public {
+        false
+    } else {
+        match problem.visibility {
+            ProblemVisibility::ContestOnly => {
                 // Check for contest access
                 todo!()
             }
-        }
-        ProblemVisibility::Public => true,
-        ProblemVisibility::Private => {
-            if !authed_id.is_some() {
-                false
-            } else {
-                problem.owner.id.to_string() == authed_id.unwrap()
-            }
-        }
-        ProblemVisibility::Internal => {
-            if !authed_id.is_some() {
-                false
-            } else {
+            ProblemVisibility::Public => true,
+            ProblemVisibility::Private => problem.owner.id.to_string() == authed_id.unwrap(),
+            ProblemVisibility::Internal => {
                 // Check for internal access
                 todo!()
             }
