@@ -112,7 +112,7 @@ async fn test_category() -> Result<()> {
     let contest_data: OwnedId = data.unwrap();
 
     let response = client
-        .post("/contest/add")
+        .post("/problems/add")
         .json(&AddProblems {
             auth: OwnedCredentials {
                 id: id.clone(),
