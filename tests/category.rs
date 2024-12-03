@@ -37,7 +37,7 @@ async fn test_category() -> Result<()> {
 
     assert!(success);
 
-    let mut new_category_id: Vec<String> = Vec::new();
+    let mut new_category_ids: Vec<String> = Vec::new();
 
     for i in 0..10 {
         let response = client
@@ -67,7 +67,7 @@ async fn test_category() -> Result<()> {
 
         assert!(success);
         println!("Created category: {}", data.id);
-        new_category_id.push(data.id);
+        new_category_ids.push(data.id);
     }
 
     let response = client
@@ -93,9 +93,9 @@ async fn test_category() -> Result<()> {
     assert!(success);
     println!("Listed categories: {:#?}", data);
 
-    for i in 0..10 {
+    for new_category_id in new_category_ids.iter().take(10) {
         let response = client
-            .post(format!("/category/delete/{}", new_category_id[i]))
+            .post(format!("/category/delete/{}", new_category_id))
             .json(&CreateCategory {
                 id: &id,
                 token: &token,
