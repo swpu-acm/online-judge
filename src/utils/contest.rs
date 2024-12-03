@@ -67,7 +67,3 @@ pub async fn remove_problem(
         .await?
         .take(0)?)
 }
-
-// pub async fn participant(db: &Surreal<Client>, id: &str, user_id: &str) -> Result<Option<Contest>> {
-//     Ok(db.query("SELECT participants FROM contest WHERE participants = $user_id AND record::id(id) = $id"))
-// }
