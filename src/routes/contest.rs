@@ -6,7 +6,7 @@ use crate::{
         contest::{AddProblems, CreateContest},
         error::Error,
         response::{Empty, Response},
-        OwnedId,
+        Credentials, OwnedId,
     },
     utils::{contest, session},
     Result,
@@ -61,6 +61,27 @@ pub async fn add_problem(
         message: "Problems added successfully".into(),
         data: None,
     }))
+}
+
+#[post("/problems/remove/<contest_id>/<problem_id>", data = "<auth>")]
+pub async fn remove_problem(
+    db: &State<Surreal<Client>>,
+    contest_id: &str,
+    problem_id: &str,
+    auth: Json<Credentials<'_>>,
+) -> Result<Empty> {
+    if !session::verify(db, &auth.id, &auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid session".into())));
+    }
+
+    contest::remove_problem(db, contest_id.to_string(), ("problem", problem_id).into()).await?;
+
+    Ok(Response {
+        success: true,
+        message: "Problem deleted successfully".into(),
+        data: None,
+    }
+    .into())
 }
 
 pub fn routes() -> Vec<rocket::Route> {

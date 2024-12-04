@@ -68,6 +68,7 @@ async fn test_problem() -> Result<()> {
                     tb: "account".to_string(),
                     id: id.clone(),
                 },
+                contest: None,
                 time_limit: 1000,
                 memory_limit: 128,
                 test_cases: vec![],
@@ -218,6 +219,7 @@ async fn test_problem() -> Result<()> {
                 tb: "account".to_string(),
                 id: id.clone(),
             },
+            contest: None,
             time_limit: 1000,
             memory_limit: 128,
             test_cases: vec![UserTestCase {
