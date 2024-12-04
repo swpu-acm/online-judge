@@ -27,6 +27,7 @@ pub struct CreateAsset<'a> {
 #[derive(Serialize, Deserialize)]
 pub struct UserContent {
     pub id: String,
+    pub name: String,
 }
 
 pub struct AssetFile(pub(crate) NamedFile);

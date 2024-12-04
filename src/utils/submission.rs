@@ -21,7 +21,8 @@ pub async fn create(
             status: Status::InQueue,
 
             creator: ("account", account_id).into(),
-            results: vec![],
+            judge_details: vec![],
+            judge_result: None,
 
             contest: None,
 

@@ -116,6 +116,21 @@ impl From<CreateProblem<'_>> for Problem {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OwnedUserTestCase {
+    pub input: String,
+    pub output: String,
+}
+
+impl From<TestCase> for OwnedUserTestCase {
+    fn from(value: TestCase) -> Self {
+        OwnedUserTestCase {
+            input: value.input.id.to_string(),
+            output: value.output.id.to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UserProblem {
     pub id: String,
@@ -129,6 +144,7 @@ pub struct UserProblem {
 
     pub time_limit: u64,
     pub memory_limit: u64,
+    pub test_cases: Vec<OwnedUserTestCase>,
 
     pub creator: String,
     pub owner: UserRecordId,
@@ -153,6 +169,7 @@ impl From<Problem> for UserProblem {
             hint: value.hint,
             time_limit: value.time_limit,
             memory_limit: value.memory_limit,
+            test_cases: value.test_cases.into_iter().map(Into::into).collect(),
             creator: value.creator.id.to_string(),
             owner: value.owner.into(),
             categories: value.categories,
