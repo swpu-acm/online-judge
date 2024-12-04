@@ -53,6 +53,8 @@ pub struct Problem {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
+    pub contest: Option<Thing>,
+
     pub visibility: ProblemVisibility,
 
     pub created_at: chrono::NaiveDateTime,
@@ -89,6 +91,8 @@ pub struct CreateProblem<'r> {
     pub categories: Vec<String>,
     pub tags: Vec<String>,
 
+    pub contest: Option<Thing>,
+
     pub visibility: ProblemVisibility,
 }
 
@@ -110,6 +114,7 @@ impl From<CreateProblem<'_>> for Problem {
             categories: val.categories,
             tags: val.tags,
             visibility: val.visibility,
+            contest: None,
             created_at: chrono::Local::now().naive_local(),
             updated_at: chrono::Local::now().naive_local(),
         }
