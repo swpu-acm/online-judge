@@ -12,8 +12,10 @@ license = "AGPL-3.0-only"
 [dependencies]
 anyhow = "1.0.92"
 chrono = { version = "0.4.38", features = ["serde"] }
-eval-stack = { version = "0.2.0", features = ["serde"] }
+eval-stack = { version = "0.3.1", default-features = false, features = [
+    "serde",
+] }
 rocket = { version = "0.5.1", features = ["json"] }
 serde = { version = "1.0.214", features = ["derive"] }
-surrealdb = "2.1.0"
+surrealdb = "2.1.2"
 uuid = { version = "1.11.0", features = ["v4"] }

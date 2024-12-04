@@ -18,7 +18,8 @@ pub struct Submission {
     pub problem: Thing,
     pub code: String,
     pub status: Status,
-    pub results: Vec<JudgeResult>,
+    pub judge_details: Vec<JudgeResult>,
+    pub judge_result: Option<JudgeResult>,
     pub creator: Thing,
     pub contest: Option<Thing>,
 

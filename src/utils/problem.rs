@@ -11,13 +11,14 @@ pub async fn create(db: &Surreal<Client>, problem: CreateProblem<'_>) -> Result<
         .await?)
 }
 
-pub async fn update(db: &Surreal<Client>, problem: Problem) -> Result<Option<Problem>> {
+pub async fn update(
+    db: &Surreal<Client>,
+    id: &str,
+    problem: CreateProblem<'_>,
+) -> Result<Option<Problem>> {
     Ok(db
-        .update((
-            "problem",
-            problem.id.clone().expect("empty id").id.to_string(),
-        ))
-        .content(problem)
+        .update(("problem", id))
+        .content(Into::<Problem>::into(problem))
         .await?)
 }
 

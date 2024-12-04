@@ -24,9 +24,7 @@ pub async fn upload(
     data: Form<CreateAsset<'_>>,
 ) -> Result<UserContent> {
     if !session::verify(db, data.auth.id, data.auth.token).await {
-        return Err(Error::Unauthorized(Json(
-            "Failed to grant access permission".into(),
-        )));
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
     let file_extension = data
@@ -41,9 +39,7 @@ pub async fn upload(
         .join(data.auth.id);
 
     if !user_path.exists() {
-        create_dir_all(&user_path)
-            .await
-            .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+        create_dir_all(&user_path).await?;
     }
     let file_name = format!("{}.{}", uuid::Uuid::new_v4(), file_extension);
     let file_path = user_path.join(&file_name);
@@ -61,22 +57,22 @@ pub async fn upload(
         .await
         .map_err(|e| Error::ServerError(Json(format!("Failed to save file: {}", e).into())))?;
 
-    let asset = asset::create(
-        db,
-        data.owner.clone(),
-        data.file
-            .name()
-            .unwrap_or(&uuid::Uuid::new_v4().to_string()),
-        file_path,
-    )
-    .await
-    .map_err(|e| Error::ServerError(Json(e.into())))?
-    .ok_or(Error::ServerError(Json("Failed to create asset".into())))?;
+    let asset_name = data
+        .file
+        .name()
+        .map(|name| name.to_string())
+        .unwrap_or(uuid::Uuid::new_v4().to_string());
+
+    let asset = asset::create(db, data.owner.clone(), &asset_name, file_path)
+        .await?
+        .ok_or(Error::ServerError(Json("Failed to create asset".into())))?;
+
     Ok(Json(Response {
         success: true,
         message: "Content updated successfully".into(),
         data: Some(UserContent {
             id: asset.id.unwrap().id.to_string(),
+            name: asset_name,
         }),
     }))
 }
@@ -88,26 +84,23 @@ pub async fn get(db: &State<Surreal<Client>>, id: &str) -> Option<AssetFile> {
     Some(AssetFile(NamedFile::open(&asset.path).await.ok()?))
 }
 
-#[post("/delete/<id>", data = "<auth>")]
+#[delete("/delete/<id>", data = "<auth>")]
 pub async fn delete(
     db: &State<Surreal<Client>>,
     id: &str,
-    auth: Form<Credentials<'_>>,
+    auth: Json<Credentials<'_>>,
 ) -> Result<Empty> {
     if !session::verify(db, auth.id, auth.token).await {
-        return Err(Error::Unauthorized(Json(
-            "Failed to grant access permission".into(),
-        )));
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
     let asset = asset::get_by_id(db, id)
-        .await
-        .map_err(Error::from)?
+        .await?
         .ok_or(Error::NotFound(Json("Asset not found".into())))?;
 
-    rocket::tokio::fs::remove_file(&asset.path)
-        .await
-        .map_err(|e| Error::ServerError(Json(format!("Failed to delete file: {}", e).into())))?;
+    let _ = rocket::tokio::fs::remove_file(&asset.path).await;
+
+    asset::delete(db, id).await?;
 
     Ok(Json(Response {
         success: true,

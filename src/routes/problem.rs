@@ -148,6 +148,30 @@ pub async fn list(
     }))
 }
 
+#[post("/update/<id>", data = "<problem>")]
+pub async fn update(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    problem: Json<CreateProblem<'_>>,
+) -> Result<Empty> {
+    if !session::verify(db, problem.id, problem.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+
+    problem::update(db, id, problem.into_inner())
+        .await
+        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .ok_or(Error::ServerError(Json(
+            "Failed to update problem, please try again later.".into(),
+        )))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "Problem updated successfully".to_string(),
+        data: None,
+    }))
+}
+
 #[delete("/delete/<id>", data = "<auth>")]
 pub async fn delete(
     db: &State<Surreal<Client>>,
@@ -177,5 +201,5 @@ pub async fn delete(
 
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, get, list, delete]
+    routes![create, get, update, list, delete]
 }
