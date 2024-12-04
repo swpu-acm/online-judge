@@ -70,7 +70,7 @@ pub async fn remove_problem(
     problem_id: &str,
     auth: Json<Credentials<'_>>,
 ) -> Result<Empty> {
-    if !session::verify(db, &auth.id, &auth.token).await {
+    if !session::verify(db, auth.id, auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid session".into())));
     }
 
