@@ -111,19 +111,17 @@ pub async fn list_by_problem(
     }))
 }
 
-#[post("/list/contest/<contest_id>/<user_id>", data = "<_auth>")]
-pub async fn list_within_contest(
+#[post("/list/<id>/account/<user_id>", data = "<auth>")]
+pub async fn list_by_problem_for_account(
     db: &State<Surreal<Client>>,
-    contest_id: &str,
+    id: &str,
     user_id: &str,
-    _auth: Json<Credentials<'_>>,
+    auth: Json<Credentials<'_>>,
 ) -> Result<Vec<Submission>> {
-    let submissions = submission::list_within_contest(
-        db,
-        ("contest", contest_id).into(),
-        ("account", user_id).into(),
-    )
-    .await?;
+    if !session::verify(db, &auth.id, &auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+    let submissions = submission::list_by_problem_for_account(db, id, user_id).await?;
 
     Ok(Json(Response {
         success: true,
@@ -139,7 +137,7 @@ pub fn routes() -> Vec<rocket::Route> {
         get,
         list_by_user,
         list_by_contest,
-        list_within_contest,
+        list_by_problem_for_account,
         list_by_problem,
     ]
 }
