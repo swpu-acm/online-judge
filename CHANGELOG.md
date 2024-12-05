@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.11]
+
+### New Features
+
+- [`b27e575`](https://github.com/swpu-acm/online-judge/commit/b27e575641d1398ef1571fef2bc9e890851d0ec1) ([#47](https://github.com/swpu-acm/online-judge/pull/47) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Optimize endpoints for problem updates.
+
 ## \[0.1.10]
 
 ### New Features
