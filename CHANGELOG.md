@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.1.12]
+
+### New Features
+
+- [`8a48b23`](https://github.com/swpu-acm/online-judge/commit/8a48b23c0c2821f0315b3745ff04aaf54e29c295) ([#50](https://github.com/swpu-acm/online-judge/pull/50) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Optimize endpoints for problem updates.
+- [`8a48b23`](https://github.com/swpu-acm/online-judge/commit/8a48b23c0c2821f0315b3745ff04aaf54e29c295) ([#50](https://github.com/swpu-acm/online-judge/pull/50) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) List submissions by problem for account.
+
 ## \[0.1.11]
 
 ### New Features
