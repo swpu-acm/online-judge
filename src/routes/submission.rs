@@ -118,7 +118,7 @@ pub async fn list_by_problem_for_account(
     user_id: &str,
     auth: Json<Credentials<'_>>,
 ) -> Result<Vec<Submission>> {
-    if !session::verify(db, &auth.id, &auth.token).await {
+    if !session::verify(db, auth.id, auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
     let submissions = submission::list_by_problem_for_account(db, id, user_id).await?;
