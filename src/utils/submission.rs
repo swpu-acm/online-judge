@@ -72,3 +72,19 @@ pub async fn list_by_problem(db: &Surreal<Client>, problem: Thing) -> Result<Vec
         .await?
         .take(0)?)
 }
+
+const LIST_BY_PROBLEM_FOR_USER_QUERY: &str = r#"
+SELECT * FROM submission WHERE record::id(problem) = $id AND record::id(creator) = $account_id ORDER BY created_at DESC
+"#;
+pub async fn list_by_problem_for_account(
+    db: &Surreal<Client>,
+    id: &str,
+    account_id: &str,
+) -> Result<Vec<Submission>> {
+    Ok(db
+        .query(LIST_BY_PROBLEM_FOR_USER_QUERY)
+        .bind(("id", id.to_string()))
+        .bind(("account_id", account_id.to_string()))
+        .await?
+        .take(0)?)
+}
