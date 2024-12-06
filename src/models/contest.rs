@@ -30,7 +30,6 @@ pub struct Contest {
 
     pub start_time: chrono::NaiveDateTime,
     pub end_time: chrono::NaiveDateTime,
-    pub problems: Vec<Thing>,
 
     pub owner: Thing,
     pub creator: Thing,

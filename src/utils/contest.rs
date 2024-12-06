@@ -19,7 +19,6 @@ pub async fn create(
             announcement: None,
             start_time: contest.start_time,
             end_time: contest.end_time,
-            problems: vec![],
             owner: contest.owner.clone().into(),
             creator: ("account", creator_id).into(),
             updaters: vec![("account", creator_id).into()],

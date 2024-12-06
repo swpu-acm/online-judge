@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.13]
+
+### New Features
+
+- [`63283e7`](https://github.com/swpu-acm/online-judge/commit/63283e766f5b7012b059cbf531fb777c367fff90) ([#52](https://github.com/swpu-acm/online-judge/pull/52) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support create and list all contests.
+
 ## \[0.1.12]
 
 ### New Features
