@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.1.15]
+
+### New Features
+
+- [`0d059f6`](https://github.com/swpu-acm/online-judge/commit/0d059f6ed6b1d496f9ad579f014cb2bd483256ee) ([#56](https://github.com/swpu-acm/online-judge/pull/56) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support create and list all contests.
+- [`0d059f6`](https://github.com/swpu-acm/online-judge/commit/0d059f6ed6b1d496f9ad579f014cb2bd483256ee) ([#56](https://github.com/swpu-acm/online-judge/pull/56) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support `ContestProblem` model to display submits and acceptations.
+- [`0d059f6`](https://github.com/swpu-acm/online-judge/commit/0d059f6ed6b1d496f9ad579f014cb2bd483256ee) ([#56](https://github.com/swpu-acm/online-judge/pull/56) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support enpoints for getting rank list.
+
+### Bug Fixes
+
+- [`0d059f6`](https://github.com/swpu-acm/online-judge/commit/0d059f6ed6b1d496f9ad579f014cb2bd483256ee) ([#56](https://github.com/swpu-acm/online-judge/pull/56) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Fixed index pages cannot be displayed correctly.
+
 ## \[0.1.14]
 
 ### New Features
