@@ -71,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "algohub-server"
-version = "0.1.10"
+version = "0.1.12"
 dependencies = [
  "anyhow",
  "chrono",
