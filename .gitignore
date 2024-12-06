@@ -16,3 +16,6 @@
 
 # Node.js
 /node_modules
+
+# Assets
+/dist
