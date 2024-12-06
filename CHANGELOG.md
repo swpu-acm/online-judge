@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.1.14]
+
+### New Features
+
+- [`3df5237`](https://github.com/swpu-acm/online-judge/commit/3df523734d836d9e312fe82d7ea73f41ae90807e) ([#54](https://github.com/swpu-acm/online-judge/pull/54) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support create and list all contests.
+- [`3df5237`](https://github.com/swpu-acm/online-judge/commit/3df523734d836d9e312fe82d7ea73f41ae90807e) ([#54](https://github.com/swpu-acm/online-judge/pull/54) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Support `ContestProblem` model to display submits and acceptations.
+
 ## \[0.1.13]
 
 ### New Features
