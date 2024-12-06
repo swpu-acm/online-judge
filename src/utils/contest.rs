@@ -69,12 +69,11 @@ SELECT title, record::id(id) AS id, count(
     AND judge_result.status.type == "accepted"
 ) > 0 AS solved,
 count(
-    SELECT record::id(creator)
-    FROM submission WHERE record::id(creator) == $account_id AND problem == $parent.id
+    SELECT record::id(creator) FROM submission WHERE problem == $parent.id
 ) AS submittedCount,
 count(
     SELECT record::id(creator)
-    FROM submission WHERE record::id(creator) == $account_id AND problem == $parent.id
+    FROM submission WHERE problem == $parent.id
     AND judge_result.status.type == "accepted"
 ) AS acceptedCount
 FROM type::thing("contest", $id).problems;
