@@ -1,7 +1,7 @@
 use anyhow::Result;
 use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::contest::{Contest, ContestData};
+use crate::models::contest::{Contest, ContestData, ContestProblem};
 
 pub async fn create(
     db: &Surreal<Client>,
@@ -41,6 +41,53 @@ pub async fn list_by_owner(db: &Surreal<Client>, id: &str) -> Result<Vec<Contest
     Ok(db
         .query("SELECT * FROM contest WHERE record::id(owner) = $id")
         .bind(("id", id.to_string()))
+        .await?
+        .take(0)?)
+}
+
+const ADD_PROBLEM: &str = r#"
+UPDATE type::thing("contest", $id)
+SET problems = array::union(problems, $problems);
+"#;
+pub async fn add_problems(
+    db: &Surreal<Client>,
+    id: String,
+    problems: Vec<Thing>,
+) -> Result<Option<Contest>> {
+    Ok(db
+        .query(ADD_PROBLEM)
+        .bind(("id", id))
+        .bind(("problems", problems))
+        .await?
+        .take(0)?)
+}
+
+const LIST_PROBLEMS: &str = r#"
+SELECT title, record::id(id) AS id, count(
+    SELECT VALUE true
+    FROM submission WHERE record::id(creator) == $account_id AND problem == $parent.id
+    AND judge_result.status.type == "accepted"
+) > 0 AS solved,
+count(
+    SELECT record::id(creator)
+    FROM submission WHERE record::id(creator) == $account_id AND problem == $parent.id
+) AS submittedCount,
+count(
+    SELECT record::id(creator)
+    FROM submission WHERE record::id(creator) == $account_id AND problem == $parent.id
+    AND judge_result.status.type == "accepted"
+) AS acceptedCount
+FROM type::thing("contest", $id).problems;
+"#;
+pub async fn list_problems(
+    db: &Surreal<Client>,
+    id: &str,
+    account_id: &str,
+) -> Result<Vec<ContestProblem>> {
+    Ok(db
+        .query(LIST_PROBLEMS)
+        .bind(("id", id.to_string()))
+        .bind(("account_id", account_id.to_string()))
         .await?
         .take(0)?)
 }

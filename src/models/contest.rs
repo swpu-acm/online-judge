@@ -117,3 +117,13 @@ impl From<Contest> for UserContest {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ContestProblem {
+    pub id: String,
+    pub title: String,
+    pub solved: bool,
+    pub submitted_count: u32,
+    pub accepted_count: u32,
+}
