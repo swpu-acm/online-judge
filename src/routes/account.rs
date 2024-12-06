@@ -6,7 +6,7 @@ use surrealdb::{engine::remote::ws::Client, Surreal};
 use crate::{
     models::{
         account::{Login, MergeProfile, Profile, Register},
-        error::{Error, ErrorResponse},
+        error::Error,
         response::{Empty, Response},
         OwnedCredentials, Record, Token,
     },
@@ -19,8 +19,8 @@ pub async fn register(
     db: &State<Surreal<Client>>,
     register: Json<Register>,
 ) -> Result<OwnedCredentials> {
-    match account::create(db, register.into_inner()).await {
-        Ok(Some(account)) => {
+    match account::create(db, register.into_inner()).await? {
+        Some(account) => {
             let token = match session::create(db, account.id.clone().unwrap()).await {
                 Ok(session) => session.unwrap().token,
                 Err(e) => return Err(Error::ServerError(Json(e.to_string().into()))),
@@ -33,19 +33,12 @@ pub async fn register(
             }
             .into())
         }
-        Ok(None) => Ok(Response {
+        None => Ok(Response {
             success: false,
             message: "Specified username or email already exists".to_string(),
             data: None,
         }
         .into()),
-        Err(e) => Err(Error::ServerError(
-            ErrorResponse {
-                success: false,
-                message: e.to_string(),
-            }
-            .into(),
-        )),
     }
 }
 

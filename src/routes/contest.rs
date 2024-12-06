@@ -65,7 +65,7 @@ pub async fn list_all(
     db: &State<Surreal<Client>>,
     auth: Json<Credentials<'_>>,
 ) -> Result<Vec<UserContest>> {
-    if !session::verify(db, &auth.id, &auth.token).await {
+    if !session::verify(db, auth.id, auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
@@ -83,7 +83,7 @@ pub async fn list_problems(
     id: &str,
     auth: Json<Credentials<'_>>,
 ) -> Result<Vec<ContestProblem>> {
-    if !session::verify(db, &auth.id, &auth.token).await {
+    if !session::verify(db, auth.id, auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
@@ -104,7 +104,7 @@ pub async fn get(
     id: &str,
     auth: Json<Credentials<'_>>,
 ) -> Result<UserContest> {
-    if !session::verify(db, &auth.id, &auth.token).await {
+    if !session::verify(db, auth.id, auth.token).await {
         return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
