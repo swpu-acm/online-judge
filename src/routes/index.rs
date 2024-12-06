@@ -12,8 +12,13 @@ use rocket::fs::NamedFile;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
 
+#[get("/")]
+async fn index() -> Result<NamedFile, std::io::Error> {
+    NamedFile::open("dist/index.html").await
+}
+
 #[get("/<file..>", rank = 1)]
-async fn index(file: PathBuf) -> Option<NamedFile> {
+async fn files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("dist/").join(file)).await.ok()
 }
 
@@ -39,7 +44,7 @@ pub async fn init_db(db_addr: &str) -> Result<Surreal<Client>> {
 pub async fn rocket(db: Surreal<Client>) -> rocket::Rocket<rocket::Build> {
     rocket::build()
         .attach(CORS)
-        .mount("/", routes![index])
+        .mount("/", routes![index, files])
         .mount("/account", account::routes())
         .mount("/asset", asset::routes())
         .mount("/problem", problem::routes())
