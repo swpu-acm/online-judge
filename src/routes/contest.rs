@@ -3,7 +3,7 @@ use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 use crate::{
     models::{
-        contest::{AddProblems, CreateContest, UserContest},
+        contest::{AddProblems, ContestProblem, CreateContest, UserContest},
         error::Error,
         response::{Empty, Response},
         Credentials, OwnedId,
@@ -42,6 +42,16 @@ pub async fn add_problems(
     }
 
     let problem = data.into_inner();
+    contest::add_problems(
+        db,
+        problem.contest_id.to_string(),
+        problem
+            .problem_ids
+            .iter()
+            .map(|&id| Thing::from(("problem", id)))
+            .collect(),
+    )
+    .await?;
 
     Ok(Json(Response {
         success: true,
@@ -67,7 +77,49 @@ pub async fn list_all(
     }))
 }
 
+#[post("/list/<id>/problems", data = "<auth>")]
+pub async fn list_problems(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    auth: Json<Credentials<'_>>,
+) -> Result<Vec<ContestProblem>> {
+    if !session::verify(db, &auth.id, &auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+
+    let problems = contest::list_problems(db, id, auth.id).await?;
+
+    dbg!(&problems);
+
+    Ok(Json(Response {
+        success: true,
+        message: "Problems listed successfully".into(),
+        data: Some(problems),
+    }))
+}
+
+#[post("/get/<id>", data = "<auth>")]
+pub async fn get(
+    db: &State<Surreal<Client>>,
+    id: &str,
+    auth: Json<Credentials<'_>>,
+) -> Result<UserContest> {
+    if !session::verify(db, &auth.id, &auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+
+    let contest = contest::get(db, id)
+        .await?
+        .ok_or(Error::NotFound(Json("Contest not found".into())))?;
+
+    Ok(Json(Response {
+        success: true,
+        message: "Contest retrieved successfully".into(),
+        data: Some(contest.into()),
+    }))
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, add_problems, list_all]
+    routes![create, get, add_problems, list_problems, list_all]
 }

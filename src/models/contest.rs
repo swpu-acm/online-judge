@@ -30,6 +30,7 @@ pub struct Contest {
 
     pub start_time: chrono::NaiveDateTime,
     pub end_time: chrono::NaiveDateTime,
+    pub problems: Vec<Thing>,
 
     pub owner: Thing,
     pub creator: Thing,
@@ -116,4 +117,14 @@ impl From<Contest> for UserContest {
             updated_at: value.updated_at,
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ContestProblem {
+    pub id: String,
+    pub title: String,
+    pub solved: bool,
+    pub submitted_count: u32,
+    pub accepted_count: u32,
 }
