@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.16]
+
+### Bug Fixes
+
+- [`042e87e`](https://github.com/swpu-acm/online-judge/commit/042e87e9cfc130d5ebaf37cf51ba34b92c0f88c1) ([#58](https://github.com/swpu-acm/online-judge/pull/58) by [@fu050409](https://github.com/swpu-acm/online-judge/../../fu050409)) Fix listing submissions and acceptations for problems in contest list.
+
 ## \[0.1.15]
 
 ### New Features
