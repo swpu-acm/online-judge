@@ -89,8 +89,6 @@ pub async fn list_problems(
 
     let problems = contest::list_problems(db, id, auth.id).await?;
 
-    dbg!(&problems);
-
     Ok(Json(Response {
         success: true,
         message: "Problems listed successfully".into(),
