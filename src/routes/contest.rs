@@ -3,10 +3,10 @@ use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 use crate::{
     models::{
-        contest::{AddProblems, CreateContest},
+        contest::{AddProblems, CreateContest, UserContest},
         error::Error,
         response::{Empty, Response},
-        OwnedId,
+        Credentials, OwnedId,
     },
     utils::{contest, session},
     Result,
@@ -15,13 +15,12 @@ use crate::{
 #[post("/create", data = "<contest>")]
 pub async fn create(db: &State<Surreal<Client>>, contest: Json<CreateContest>) -> Result<OwnedId> {
     if !session::verify(db, &contest.auth.id, &contest.auth.token).await {
-        return Err(Error::Unauthorized(Json("Invalid session".into())));
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
     let contest = contest.into_inner();
     let contest = contest::create(db, &contest.auth.id, contest.data)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.into())))?
+        .await?
         .ok_or(Error::ServerError(Json("Failed to create contest".into())))?;
 
     Ok(Json(Response {
@@ -34,27 +33,15 @@ pub async fn create(db: &State<Surreal<Client>>, contest: Json<CreateContest>) -
 }
 
 #[post("/problems/add", data = "<data>")]
-pub async fn add_problem(
+pub async fn add_problems(
     db: &State<Surreal<Client>>,
     data: Json<AddProblems<'_>>,
 ) -> Result<Empty> {
     if !session::verify(db, &data.auth.id, &data.auth.token).await {
-        return Err(Error::Unauthorized(Json("Invalid session".into())));
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
     }
 
     let problem = data.into_inner();
-    contest::add_problems(
-        db,
-        problem.contest_id,
-        &problem
-            .problem_ids
-            .iter()
-            .map(|&p| Thing::from(("problem", p)))
-            .collect::<Vec<Thing>>(),
-    )
-    .await
-    .map_err(|e| Error::ServerError(Json(e.into())))?
-    .ok_or(Error::NotFound(Json("Contest not found".into())))?;
 
     Ok(Json(Response {
         success: true,
@@ -63,7 +50,24 @@ pub async fn add_problem(
     }))
 }
 
+#[post("/list/all", data = "<auth>")]
+pub async fn list_all(
+    db: &State<Surreal<Client>>,
+    auth: Json<Credentials<'_>>,
+) -> Result<Vec<UserContest>> {
+    if !session::verify(db, &auth.id, &auth.token).await {
+        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
+    }
+
+    let contests = contest::list_all(db).await?;
+    Ok(Json(Response {
+        success: true,
+        message: "Contests listed successfully".into(),
+        data: Some(contests.into_iter().map(|c| c.into()).collect()),
+    }))
+}
+
 pub fn routes() -> Vec<rocket::Route> {
     use rocket::routes;
-    routes![create, add_problem]
+    routes![create, add_problems, list_all]
 }

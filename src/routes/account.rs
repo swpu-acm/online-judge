@@ -55,14 +55,11 @@ pub async fn profile(
     profile: Json<MergeProfile<'_>>,
 ) -> Result<Empty> {
     account::get_by_id::<Record>(db, profile.id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::NotFound(Json("Account not found".into())))?;
 
     if session::verify(db, profile.id, profile.token).await {
-        account::merge_profile(db, profile.id, profile.profile.clone())
-            .await
-            .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+        account::merge_profile(db, profile.id, profile.profile.clone()).await?;
         Ok(Response {
             success: true,
             message: "Profile updated successfully".into(),
@@ -70,15 +67,14 @@ pub async fn profile(
         }
         .into())
     } else {
-        Err(Error::Unauthorized(Json("Invalid token".into())))
+        Err(Error::Unauthorized(Json("Invalid credentials".into())))
     }
 }
 
 #[get("/profile/<id>")]
 pub async fn get_profile(db: &State<Surreal<Client>>, id: &str) -> Result<Profile> {
     let profile = account::get_by_identity::<Profile>(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::NotFound(Json("Account not found".into())))?;
 
     Ok(Response {
@@ -97,13 +93,9 @@ pub async fn delete(db: &State<Surreal<Client>>, id: &str, auth: Json<Token<'_>>
         )));
     }
 
-    account::delete(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    account::delete(db, id).await?;
 
-    remove_dir_all(Path::new("content/").join(id))
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    remove_dir_all(Path::new("content/").join(id)).await?;
 
     Ok(Response {
         success: true,

@@ -113,7 +113,7 @@ pub async fn list(
 ) -> Result<Vec<UserProblem>> {
     let authed_id = if let Some(auth) = &data.auth {
         if !session::verify(db, &auth.id, &auth.token).await {
-            return Err(Error::Unauthorized(Json("Invalid token".into())));
+            return Err(Error::Unauthorized(Json("Invalid credentials".into())));
         };
         Some(auth.id.clone())
     } else {
@@ -125,8 +125,7 @@ pub async fn list(
     let account_id = if let Some(identity) = data.identity.clone() {
         Some(
             account::get_by_identity::<Account>(db, &identity)
-                .await
-                .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+                .await?
                 .ok_or(Error::Unauthorized(Json("Invalid identity".into())))?
                 .id
                 .unwrap()
@@ -137,9 +136,8 @@ pub async fn list(
         None
     };
 
-    let problems = problem::list_for_account::<Problem>(db, account_id, authed_id, data.limit)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    let problems =
+        problem::list_for_account::<Problem>(db, account_id, authed_id, data.limit).await?;
 
     Ok(Json(Response {
         success: true,

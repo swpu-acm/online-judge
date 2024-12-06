@@ -1,5 +1,5 @@
 use anyhow::Result;
-use surrealdb::{engine::remote::ws::Client, opt::PatchOp, sql::Thing, Surreal};
+use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 use crate::models::contest::{Contest, ContestData};
 
@@ -19,7 +19,6 @@ pub async fn create(
             announcement: None,
             start_time: contest.start_time,
             end_time: contest.end_time,
-            problems: vec![],
             owner: contest.owner.clone().into(),
             creator: ("account", creator_id).into(),
             updaters: vec![("account", creator_id).into()],
@@ -34,23 +33,16 @@ pub async fn get(db: &Surreal<Client>, id: &str) -> Result<Option<Contest>> {
     Ok(db.select(("contest", id)).await?)
 }
 
-pub async fn list(db: &Surreal<Client>, id: Thing) -> Result<Vec<Contest>> {
-    Ok(db
-        .query("SELECT * FROM contest WHERE owner = $id")
-        .bind(("id", id))
-        .await?
-        .take(0)?)
+pub async fn list_all(db: &Surreal<Client>) -> Result<Vec<Contest>> {
+    Ok(db.query("SELECT * FROM contest").await?.take(0)?)
 }
 
-pub async fn add_problems(
-    db: &Surreal<Client>,
-    id: &str,
-    problems: &[Thing],
-) -> Result<Option<Contest>> {
+pub async fn list_by_owner(db: &Surreal<Client>, id: &str) -> Result<Vec<Contest>> {
     Ok(db
-        .update(("contest", id))
-        .patch(PatchOp::add("/problems", problems))
-        .await?)
+        .query("SELECT * FROM contest WHERE record::id(owner) = $id")
+        .bind(("id", id.to_string()))
+        .await?
+        .take(0)?)
 }
 
 const REMOVE_PROBLEM: &str =

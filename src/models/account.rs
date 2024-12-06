@@ -43,6 +43,7 @@ pub struct Login<'r> {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(crate = "rocket::serde")]
 pub struct Profile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
@@ -61,7 +62,7 @@ pub struct Profile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sex: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub birthday: Option<String>,
+    pub birthday: Option<chrono::NaiveDateTime>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,

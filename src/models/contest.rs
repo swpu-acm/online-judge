@@ -30,7 +30,6 @@ pub struct Contest {
 
     pub start_time: chrono::NaiveDateTime,
     pub end_time: chrono::NaiveDateTime,
-    pub problems: Vec<Thing>,
 
     pub owner: Thing,
     pub creator: Thing,
@@ -70,4 +69,51 @@ pub struct RemoveProblem {
     pub auth: OwnedCredentials,
     pub contest_id: Thing,
     pub problem_id: Thing,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct UserContest {
+    pub id: String,
+
+    pub name: String,
+    pub mode: Mode,
+    pub visibility: Visibility,
+    pub description: String,
+    pub announcement: Option<String>,
+
+    pub start_time: chrono::NaiveDateTime,
+    pub end_time: chrono::NaiveDateTime,
+
+    pub owner: UserRecordId,
+    pub creator: String,
+    pub updaters: Vec<String>,
+    pub participants: Vec<String>,
+
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+impl From<Contest> for UserContest {
+    fn from(value: Contest) -> Self {
+        UserContest {
+            id: value.id.unwrap().id.to_string(),
+            name: value.name,
+            mode: value.mode,
+            visibility: value.visibility,
+            description: value.description,
+            announcement: value.announcement,
+            start_time: value.start_time,
+            end_time: value.end_time,
+            owner: value.owner.into(),
+            creator: value.creator.to_string(),
+            updaters: value.updaters.iter().map(|x| x.id.to_string()).collect(),
+            participants: value
+                .participants
+                .iter()
+                .map(|x| x.id.to_string())
+                .collect(),
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+        }
+    }
 }
