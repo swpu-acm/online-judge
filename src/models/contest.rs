@@ -127,12 +127,3 @@ pub struct ContestProblem {
     pub submitted_count: u32,
     pub accepted_count: u32,
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct ContestRank {
-    name: String,
-    problem_id: String,
-    accepted: bool,
-    wrongs: u32,
-}
