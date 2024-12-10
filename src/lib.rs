@@ -10,6 +10,7 @@ pub mod utils {
     pub mod organization;
     pub mod problem;
     pub mod session;
+    pub mod solution;
     pub mod submission;
 }
 
@@ -22,6 +23,7 @@ pub mod routes {
     pub mod organization;
 
     pub mod problem;
+    pub mod solution;
     pub mod submission;
 }
 
