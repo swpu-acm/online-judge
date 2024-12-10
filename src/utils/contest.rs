@@ -1,7 +1,7 @@
 use anyhow::Result;
 use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::contest::{Contest, ContestData, ContestProblem, ContestRank};
+use crate::models::contest::{Contest, ContestData, ContestProblem};
 
 pub async fn create(
     db: &Surreal<Client>,
@@ -102,38 +102,6 @@ pub async fn remove_problem(
         .query(REMOVE_PROBLEM)
         .bind(("id", id))
         .bind(("problem", problem))
-        .await?
-        .take(0)?)
-}
-
-const RANK_QUERY: &str = r#"
-SELECT VALUE array::map((SELECT VALUE id FROM type::thing("contest", $id).problems), |$problem| {
-    LET $submissions = SELECT judge_result.status.type AS status, created_at
-    FROM submission WHERE problem.id == $problem AND $parent.id == creator ORDER BY created_at ASC;
-    LET $first_accepted = array::find_index($submissions, |$submission| {
-        RETURN $submission.status == "accepted"
-    });
-    RETURN IF $first_accepted {
-        RETURN {
-            name: $problem.title,
-            problem_id: record::id($problem),
-            accepted: true,
-            wrongs: count($submissions) - $first_accepted - 1,
-        }
-    } ELSE {
-        RETURN {
-            name: $problem.title,
-            problem_id: record::id($problem),
-            accepted: false,
-            wrongs: count($submissions),
-        }
-    }
-}) FROM array::distinct(SELECT VALUE creator FROM submission)
-"#;
-pub async fn rank(db: &Surreal<Client>, id: &str) -> Result<Vec<ContestRank>> {
-    Ok(db
-        .query(RANK_QUERY)
-        .bind(("id", id.to_string()))
         .await?
         .take(0)?)
 }

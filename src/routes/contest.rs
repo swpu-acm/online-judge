@@ -3,7 +3,7 @@ use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
 use crate::{
     models::{
-        contest::{AddProblems, ContestProblem, ContestRank, CreateContest, UserContest},
+        contest::{AddProblems, ContestProblem, CreateContest, UserContest},
         error::Error,
         response::{Empty, Response},
         Credentials, OwnedId,
@@ -114,25 +114,6 @@ pub async fn get(
         success: true,
         message: "Contest retrieved successfully".into(),
         data: Some(contest.into()),
-    }))
-}
-
-#[post("/rank/<id>", data = "<auth>")]
-pub async fn rank(
-    db: &State<Surreal<Client>>,
-    id: &str,
-    auth: Json<Credentials<'_>>,
-) -> Result<Vec<ContestRank>> {
-    if !session::verify(db, auth.id, auth.token).await {
-        return Err(Error::Unauthorized(Json("Invalid credentials".into())));
-    }
-
-    let rank = contest::rank(db, id).await?;
-
-    Ok(Json(Response {
-        success: true,
-        message: "Contest rank retrieved successfully".into(),
-        data: Some(rank),
     }))
 }
 
