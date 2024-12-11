@@ -8,8 +8,7 @@ use crate::{
     utils::{session, solution},
     Result,
 };
-use rocket::{post, serde::json::Json, tokio::fs::remove_dir_all, State};
-use std::path::Path;
+use rocket::{post, serde::json::Json, State};
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 #[post("/create", data = "<sol>")]
@@ -46,8 +45,6 @@ pub async fn delete(
     }
 
     solution::delete(db, id).await?;
-
-    remove_dir_all(Path::new("content/").join(id)).await?;
 
     Ok(Response {
         success: true,

@@ -5,7 +5,7 @@ use surrealdb::sql::Thing;
 pub struct Solution {
     pub id: Option<Thing>,
 
-    pub problem_id: Thing,
+    pub problem: Thing,
     pub creator: Thing,
     pub title: String,
     pub content: String,
@@ -16,10 +16,10 @@ pub struct Solution {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct SolutionData {
-    pub title: String,
-    pub content: String,
-    pub problem_id: String,
+pub struct SolutionData<'r> {
+    pub title: &'r str,
+    pub content: &'r str,
+    pub problem: &'r str,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,5 +27,5 @@ pub struct SolutionData {
 pub struct CreateSolution<'r> {
     pub id: &'r str,
     pub token: &'r str,
-    pub data: SolutionData,
+    pub data: SolutionData<'r>, 
 }

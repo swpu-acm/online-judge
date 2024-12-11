@@ -89,9 +89,9 @@ async fn test_solution() -> Result<()> {
             id: &id,
             token: &token,
             data: SolutionData {
-                title: "test".to_string(),
-                content: "test".to_string(),
-                problem_id: problem_data.id,
+                title: "test",
+                content: "test",
+                problem: &problem_data.id,
             },
         })
         .dispatch()
@@ -107,7 +107,7 @@ async fn test_solution() -> Result<()> {
     let data: OwnedId = data.unwrap();
 
     assert!(success);
-    println!("Created organization: {}", data.id);
+    println!("Created solution: {}", data.id);
 
     let response = client
         .post(format!("/solution/delete/{}", data.id))
