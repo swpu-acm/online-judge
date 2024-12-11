@@ -27,5 +27,5 @@ pub struct SolutionData<'r> {
 pub struct CreateSolution<'r> {
     pub id: &'r str,
     pub token: &'r str,
-    pub data: SolutionData<'r>, 
+    pub data: SolutionData<'r>,
 }
