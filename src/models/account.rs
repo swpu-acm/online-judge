@@ -21,7 +21,7 @@ pub struct Account {
     pub college: Option<String>,
     pub major: Option<String>,
 
-    pub rating: i8,
+    pub rating: i32,
     pub active: bool,
 
     pub created_at: chrono::NaiveDateTime,

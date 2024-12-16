@@ -70,7 +70,7 @@ async fn test_organization() -> Result<()> {
     println!("Created organization: {}", data.id);
 
     let response = client
-        .post(format!("/org/delete/{}", id))
+        .post(format!("/org/delete/{}", data.id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -80,7 +80,7 @@ async fn test_organization() -> Result<()> {
 
     response.into_json::<Response<Empty>>().await.unwrap();
 
-    assert!(!Path::new("content").join(id.clone()).exists());
+    assert!(!Path::new("content").join(data.id.clone()).exists());
 
     client
         .post(format!("/account/delete/{}", id))
