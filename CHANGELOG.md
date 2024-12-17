@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.1.17]
+
+### New Features
+
+- [`5ac5d25`](https://github.com/swpu-acm/online-judge/commit/5ac5d2524eeea91ce31a0169108229c510ffd776) ([#61](https://github.com/swpu-acm/online-judge/pull/61) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) Support create, delete, get, list, update solutions
+
+### Chores
+
+- [`886474e`](https://github.com/swpu-acm/online-judge/commit/886474e4bca334405888c160089e9c24ee26459e) ([#67](https://github.com/swpu-acm/online-judge/pull/67) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) remove map_err
+
 ## \[0.1.16]
 
 ### Bug Fixes
