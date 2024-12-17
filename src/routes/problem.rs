@@ -30,8 +30,7 @@ pub async fn create(
     }
 
     let problem = problem::create(db, problem.into_inner())
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::ServerError(Json(
             "Failed to create problem, please try again later.".into(),
         )))?;
@@ -52,8 +51,7 @@ pub async fn get(
     auth: Json<Option<Credentials<'_>>>,
 ) -> Result<UserProblem> {
     let problem = problem::get::<Problem>(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::NotFound(Json(
             "Problem with specified id not found".into(),
         )))?;
@@ -157,8 +155,7 @@ pub async fn update(
     }
 
     problem::update(db, id, problem.into_inner())
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::ServerError(Json(
             "Failed to update problem, please try again later.".into(),
         )))?;

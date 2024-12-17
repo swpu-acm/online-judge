@@ -23,8 +23,7 @@ pub async fn create(
     }
 
     let data = category::create(db, category.into_inner().data)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::ServerError(Json("Failed to create category".into())))?;
 
     Ok(Json(Response {
@@ -48,9 +47,7 @@ pub async fn delete(
         )));
     }
 
-    category::delete(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    category::delete(db, id).await?;
 
     Ok(Response {
         success: true,

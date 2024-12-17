@@ -25,8 +25,7 @@ pub async fn create(
     }
 
     let org = organization::create(db, org.id, org.into_inner().org)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::ServerError(Json(
             "Failed to create a new organization".into(),
         )))?;
@@ -52,14 +51,10 @@ pub async fn delete(
         )));
     }
 
-    organization::delete(db, id)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
+    organization::delete(db, id).await?;
 
-    remove_dir_all(Path::new("content/").join(id))
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?;
-
+    remove_dir_all(Path::new("content/").join(id)).await?;
+    
     Ok(Response {
         success: true,
         message: "Organization deleted successfully".into(),

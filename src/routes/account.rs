@@ -104,8 +104,7 @@ pub async fn login(
     login: Json<Login<'_>>,
 ) -> Result<OwnedCredentials> {
     let session = session::authenticate(db, login.identity, login.password)
-        .await
-        .map_err(|e| Error::ServerError(Json(e.to_string().into())))?
+        .await?
         .ok_or(Error::Unauthorized(Json("Invalid credentials".into())))?;
     Ok(Response {
         success: true,
