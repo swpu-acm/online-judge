@@ -52,9 +52,8 @@ pub async fn delete(
     }
 
     organization::delete(db, id).await?;
-
     remove_dir_all(Path::new("content/").join(id)).await?;
-    
+
     Ok(Response {
         success: true,
         message: "Organization deleted successfully".into(),
