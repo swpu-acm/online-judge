@@ -7,6 +7,6 @@ pub mod organization;
 pub mod problem;
 pub mod response;
 pub mod shared;
+pub mod solution;
 pub mod submission;
-
 pub use shared::*;

@@ -5,6 +5,7 @@ use super::category;
 use super::contest;
 use super::organization;
 use super::problem;
+use super::solution;
 use super::submission;
 use crate::{cors::CORS, routes::account};
 use anyhow::Result;
@@ -52,5 +53,6 @@ pub async fn rocket(db: Surreal<Client>) -> rocket::Rocket<rocket::Build> {
         .mount("/category", category::routes())
         .mount("/contest", contest::routes())
         .mount("/code", submission::routes())
+        .mount("/solution", solution::routes())
         .manage(db)
 }
