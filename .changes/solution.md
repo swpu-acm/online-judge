@@ -2,4 +2,4 @@
 "algohub-server": patch:feat
 ---
 
-Support create and delete solutions
+Support create, delete, get, list, update solutions

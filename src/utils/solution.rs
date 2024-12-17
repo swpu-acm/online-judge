@@ -1,29 +1,42 @@
 use anyhow::Result;
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use serde::Deserialize;
+use surrealdb::{engine::remote::ws::Client, sql::Thing, Surreal};
 
-use crate::models::solution::{Solution, SolutionData};
+use crate::models::solution::{CreateSolution, Solution};
 
-pub async fn create(
-    db: &Surreal<Client>,
-    id: &str,
-    data: SolutionData<'_>,
-) -> Result<Option<Solution>> {
+pub async fn create(db: &Surreal<Client>, sol: CreateSolution<'_>) -> Result<Option<Solution>> {
     Ok(db
         .create("solution")
-        .content(Solution {
-            id: None,
-
-            title: data.title.to_string(),
-            creator: ("account", id).into(),
-            problem: ("problem", data.problem).into(),
-            content: data.content.to_string(),
-
-            created_at: chrono::Local::now().naive_local(),
-            updated_at: chrono::Local::now().naive_local(),
-        })
+        .content(Into::<Solution>::into(sol))
         .await?)
 }
 
 pub async fn delete(db: &Surreal<Client>, id: &str) -> Result<Option<Solution>> {
     Ok(db.delete(("solution", id)).await?)
+}
+
+pub async fn get<M>(db: &Surreal<Client>, id: &str) -> Result<Option<M>>
+where
+    for<'de> M: Deserialize<'de>,
+{
+    Ok(db.select(("solution", id)).await?)
+}
+
+pub async fn list(db: &Surreal<Client>, problem: Thing) -> Result<Vec<Solution>> {
+    Ok(db
+        .query("SELECT * FROM solution WHERE problem = $problem")
+        .bind(("problem", problem))
+        .await?
+        .take(0)?)
+}
+
+pub async fn update(
+    db: &Surreal<Client>,
+    id: &str,
+    solution: CreateSolution<'_>,
+) -> Result<Option<Solution>> {
+    Ok(db
+        .update(("solution", id))
+        .content(Into::<Solution>::into(solution))
+        .await?)
 }

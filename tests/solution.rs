@@ -7,7 +7,7 @@ use algohub_server::{
         account::Register,
         problem::{CreateProblem, ProblemVisibility},
         response::{Empty, Response},
-        solution::{CreateSolution, SolutionData},
+        solution::{CreateSolution, ListSolutions, Solution, SolutionData, UserSolution},
         Credentials, OwnedCredentials, OwnedId, Token, UserRecordId,
     },
     routes::problem::ProblemResponse,
@@ -104,13 +104,80 @@ async fn test_solution() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: OwnedId = data.unwrap();
+    let solution_data: OwnedId = data.unwrap();
 
     assert!(success);
-    println!("Created solution: {}", data.id);
+    println!("Created solution: {}", solution_data.id);
 
     let response = client
-        .post(format!("/solution/delete/{}", data.id))
+        .post(format!("/solution/update/{}", solution_data.id))
+        .json(&CreateSolution {
+            id: &id,
+            token: &token,
+            data: SolutionData {
+                title: "test2",
+                content: "test2",
+                problem: &problem_data.id,
+            },
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    let Response {
+        success,
+        message: _,
+        data: _,
+    } = response.into_json::<Response<Empty>>().await.unwrap();
+
+    assert!(success);
+
+    println!("Update solution: {}", solution_data.id);
+
+    let response = client
+        .post(format!("/solution/get/{}", solution_data.id))
+        .json(&Credentials {
+            id: &id,
+            token: &token,
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    let Response {
+        success,
+        message: _,
+        data,
+    } = response.into_json().await.unwrap();
+    let list_solution_data: UserSolution = data.unwrap();
+
+    assert!(success);
+    println!("get solution: {:#?}", list_solution_data);
+
+    let response = client
+        .post("/solution/list")
+        .json(&ListSolutions {
+            problem: problem_data.id.to_string(),
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    let Response {
+        success,
+        message: _,
+        data,
+    } = response.into_json().await.unwrap();
+    let list_solution_data: Vec<Solution> = data.unwrap();
+
+    assert!(success);
+    println!("list solution: {:#?}", list_solution_data);
+
+    let response = client
+        .post(format!("/solution/delete/{}", solution_data.id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -120,7 +187,7 @@ async fn test_solution() -> Result<()> {
 
     response.into_json::<Response<Empty>>().await.unwrap();
 
-    assert!(!Path::new("content").join(data.id.clone()).exists());
+    assert!(!Path::new("content").join(solution_data.id.clone()).exists());
 
     client
         .post(format!("/account/delete/{}", id))
