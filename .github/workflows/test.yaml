@@ -11,7 +11,7 @@ on:
       - main
     paths:
       - "src/"
-      - "tests"
+      - "tests/"
 
 jobs:
   test:
