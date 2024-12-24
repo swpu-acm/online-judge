@@ -39,11 +39,11 @@ UPDATE type::thing("organization", $id)
 pub async fn add(
     db: &Surreal<Client>,
     id: &str,
-    member: Vec<String>,
+    member: Vec<&str>,
 ) -> Result<Option<Organization>> {
     let members_to_add: Vec<Thing> = member
         .into_iter()
-        .map(|id| ("account", id.as_str()).into())
+        .map(|id| ("account", id).into())
         .collect();
 
     Ok(db
@@ -61,12 +61,13 @@ UPDATE type::thing("organization", $id)
 pub async fn remove(
     db: &Surreal<Client>,
     id: &str,
-    member: Vec<String>,
+    member: Vec<&str>,
 ) -> Result<Option<Organization>> {
     let members_to_remove: Vec<Thing> = member
         .into_iter()
-        .map(|id| ("account".to_string(), id).into())
+        .map(|id| ("account", id).into())
         .collect();
+
     Ok(db
         .query(REMOVE_MEMBERS_QUERY)
         .bind(("id", id.to_string()))

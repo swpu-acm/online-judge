@@ -1,5 +1,3 @@
-use std::vec;
-
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -23,8 +21,8 @@ pub struct Organization {
 #[serde(crate = "rocket::serde")]
 pub struct OrganizationData<'c> {
     pub name: &'c str,
-    pub display_name: Option<String>,
-    pub description: Option<String>,
+    pub display_name: Option<&'c str>,
+    pub description: Option<&'c str>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -63,7 +61,7 @@ pub struct UserOrganization {
 pub struct ChangeMember<'r> {
     pub id: &'r str,
     pub token: &'r str,
-    pub members: Vec<String>,
+    pub members: Vec<&'r str>,
 }
 
 impl From<CreateOrganization<'_>> for Organization {
@@ -71,8 +69,8 @@ impl From<CreateOrganization<'_>> for Organization {
         Organization {
             id: None,
             name: val.org.name.to_string(),
-            display_name: val.org.display_name,
-            description: val.org.description,
+            display_name: val.org.display_name.map(|s| s.to_string()),
+            description: val.org.description.map(|s| s.to_string()),
             owners: vec![("account", val.id).into()],
             members: vec![],
             creator: Some(("account".to_string(), val.id.to_string()).into()),
@@ -100,8 +98,8 @@ impl From<OrganizationData<'_>> for UpdateOrg {
     fn from(val: OrganizationData) -> Self {
         UpdateOrg {
             name: val.name.to_string(),
-            display_name: val.display_name,
-            description: val.description,
+            display_name: val.display_name.map(|s| s.to_string()),
+            description: val.description.map(|s| s.to_string()),
         }
     }
 }

@@ -95,7 +95,7 @@ async fn test_organization() -> Result<()> {
         .json(&ChangeMember {
             id: &id,
             token: &token,
-            members: vec!["k0nnyaku".to_string()],
+            members: vec!["k0"],
         })
         .dispatch()
         .await;
@@ -105,14 +105,14 @@ async fn test_organization() -> Result<()> {
     response.into_json::<Response<Empty>>().await.unwrap();
 
     assert!(success);
-    println!("add member: {}", "k0nnyaku");
+    println!("add member: {}", "k0");
 
     let response = client
         .post(format!("/org/remove/{}", org_data.id))
         .json(&ChangeMember {
             id: &id,
             token: &token,
-            members: vec!["k0nnyaku".to_string()],
+            members: vec!["k0"],
         })
         .dispatch()
         .await;
@@ -122,7 +122,7 @@ async fn test_organization() -> Result<()> {
     response.into_json::<Response<Empty>>().await.unwrap();
 
     assert!(success);
-    println!("remove member: {}", "k0nnyaku");
+    println!("remove member: {}", "k0");
 
     let response = client
         .post(format!("/org/update/{}", org_data.id))
