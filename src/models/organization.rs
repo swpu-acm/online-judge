@@ -86,8 +86,8 @@ impl From<Organization> for UserOrganization {
             name: val.name,
             display_name: val.display_name,
             description: val.description,
-            owners: val.owners.iter().map(|x| x.to_string()).collect(),
-            members: val.members.iter().map(|x| x.to_string()).collect(),
+            owners: val.owners.iter().map(|thing| thing.id.to_raw()).collect(),
+            members: val.members.iter().map(|thing| thing.id.to_raw()).collect(),
             created_at: val.created_at,
             updated_at: val.updated_at,
         }
