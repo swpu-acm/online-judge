@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.18]
+
+### New Features
+
+- [`5fd4555`](https://github.com/swpu-acm/online-judge/commit/5fd455543586e905819a9f250445c79daab3985f) ([#71](https://github.com/swpu-acm/online-judge/pull/71) by [@K0nnyaku](https://github.com/swpu-acm/online-judge/../../K0nnyaku)) Support remove, create, and update organizations and add members to organizations.
+
 ## \[0.1.17]
 
 ### New Features
