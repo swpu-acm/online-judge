@@ -3,12 +3,11 @@
         "algohub",
         "chrono",
         "covector",
-        "farmfe",
-        "ICPC",
-        "serde",
         "dtolnay",
         "farmfe",
+        "ICPC",
         "jbolda",
+        "serde",
         "signin",
         "surrealdb"
     ]

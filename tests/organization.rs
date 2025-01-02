@@ -4,7 +4,7 @@ use std::path::Path;
 
 use algohub_server::models::{
     account::Register,
-    organization::{CreateOrganization, OrganizationData},
+    organization::{ChangeMember, CreateOrganization, OrganizationData, UserOrganization},
     response::{Empty, Response},
     Credentials, OwnedCredentials, OwnedId, Token,
 };
@@ -64,13 +64,87 @@ async fn test_organization() -> Result<()> {
         message: _,
         data,
     } = response.into_json().await.unwrap();
-    let data: OwnedId = data.unwrap();
+    let org_data: OwnedId = data.unwrap();
 
     assert!(success);
-    println!("Created organization: {}", data.id);
+    println!("Created organization: {}", org_data.id);
 
     let response = client
-        .post(format!("/org/delete/{}", data.id))
+        .post(format!("/org/get/{}", org_data.id))
+        .json(&Credentials {
+            id: &id,
+            token: &token,
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    let Response {
+        success,
+        message: _,
+        data,
+    } = response.into_json().await.unwrap();
+    let data: UserOrganization = data.unwrap();
+
+    assert!(success);
+    println!("Get organization: {}", data.name);
+
+    let response = client
+        .post(format!("/org/add/{}", org_data.id))
+        .json(&ChangeMember {
+            id: &id,
+            token: &token,
+            members: vec!["k0"],
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    response.into_json::<Response<Empty>>().await.unwrap();
+
+    assert!(success);
+    println!("add member: {}", "k0");
+
+    let response = client
+        .post(format!("/org/remove/{}", org_data.id))
+        .json(&ChangeMember {
+            id: &id,
+            token: &token,
+            members: vec!["k0"],
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    response.into_json::<Response<Empty>>().await.unwrap();
+
+    assert!(success);
+    println!("remove member: {}", "k0");
+
+    let response = client
+        .post(format!("/org/update/{}", org_data.id))
+        .json(&CreateOrganization {
+            id: &id,
+            token: &token,
+            org: OrganizationData {
+                name: "test_organization_update",
+                display_name: None,
+                description: None,
+            },
+        })
+        .dispatch()
+        .await;
+
+    assert_eq!(response.status().code, 200);
+
+    assert!(success);
+    println!("updated organization: {}", org_data.id);
+
+    let response = client
+        .post(format!("/org/delete/{}", org_data.id))
         .json(&Credentials {
             id: &id,
             token: &token,
@@ -80,7 +154,9 @@ async fn test_organization() -> Result<()> {
 
     response.into_json::<Response<Empty>>().await.unwrap();
 
-    assert!(!Path::new("content").join(data.id.clone()).exists());
+    assert!(!Path::new("content").join(org_data.id.clone()).exists());
+
+    println!("Deleted organization: {}", org_data.id);
 
     client
         .post(format!("/account/delete/{}", id))
